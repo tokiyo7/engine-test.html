@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GeoDash 2.0 - Engine Test</title>
+    <style>
+        :root { --bg-dark: #05080f; --cyan: #00f0ff; --red: #ff3060; --gold: #ffd700; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; user-select: none; }
+        body { background-color: var(--bg-dark); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        
+        .header { text-align: center; margin-bottom: 20px; }
+        .title { color: var(--gold); font-size: 24px; font-weight: bold; letter-spacing: 2px; }
+        .subtitle { color: #888; font-size: 12px; }
+
+        /* Canvas Wrapper */
+        .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid var(--cyan); background: #05080f; overflow: hidden; border-radius: 4px; box-shadow: 0 0 20px rgba(0,240,255,0.2); }
+        canvas { display: block; width: 100%; height: 100%; }
+        
+        #ui-layer { position: absolute; top: 10px; left: 10px; right: 10px; display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; pointer-events: none; }
+        #ui-score { color: var(--cyan); }
+        #ui-status { color: var(--gold); }
+
+        .btn-start { margin-top: 20px; background: var(--cyan); color: #000; border: none; padding: 15px 30px; font-size: 18px; font-weight: bold; border-radius: 6px; cursor: pointer; }
+        .btn-start:hover { background: #fff; box-shadow: 0 0 15px var(--cyan); }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="title">GEODASH 2.0 ENGINE</div>
+        <div class="subtitle">Object Pooling & Delta-Time Architecture</div>
+    </div>
+
+    <div class="game-container">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <div id="ui-layer">
+            <div id="ui-score">SCORE: 0</div>
+            <div id="ui-status">READY</div>
+        </div>
+    </div>
+
+    <button class="btn-start" onclick="gameEngine.start()">START TEST RUN</button>
+
+<script>
+/**
+ * GEODASH 2.0 - CUSTOM JS ENGINE
+ * Features: Object Pooling, Fixed Timestep, Separated Physics/Render
+ */
+
+class GeoDashEngine {
+    constructor(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d', { alpha: false }); // alpha:false speeds up rendering
+        
+        // Constants
+        this.W = 800;
+        this.H = 400;
+        this.GROUND_Y = 320;
+        this.GRAVITY = 1.51;
+        this.JUMP_VEL = -21.0;
+        this.SPEED = 7.2;
+        
+        // Game State
+        this.state = 'IDLE'; // IDLE, PLAYING, DEAD
+        this.worldX = 0;
+        this.score = 0;
+        this.reqId = null;
+        this.lastTime = 0;
+
+        // Player Entity
+        this.player = { x: 130, y: this.GROUND_Y - 36, w: 36, h: 36, vy: 0, rot: 0, onGround: true };
+
+        // 📦 OBJECT POOLING (Memory Optimization)
+        // Instead of creating new objects, we reuse them.
+        this.pool = [];
+        this.activeObstacles = [];
+        this.initPool();
+
+        // Input Listeners
+        window.addEventListener('keydown', (e) => { if(e.code === 'Space') this.jump(); });
+        this.canvas.addEventListener('mousedown', () => this.jump());
+        this.canvas.addEventListener('touchstart', (e) => { e.preventDefault(); this.jump(); }, {passive: false});
+
+        this.draw(); // Initial draw
+    }
+
+    // Pre-create 50 generic objects to save RAM during gameplay
+    initPool() {
+        for(let i=0; i<50; i++) {
+            this.pool.push({ active: false, type: 'none', x: 0, y: 0, w: 0, h: 0 });
+        }
+    }
+
+    // Grab an object from the pool
+    spawnObstacle(type, xOffset, y, w, h) {
+        let obj = this.pool.find(o => !o.active);
+        if(obj) {
+            obj.active = true;
+            obj.type = type;
+            obj.x = this.worldX + this.W + xOffset; // Spawn ahead of screen
+            obj.y = y;
+            obj.w = w;
+            obj.h = h;
+            this.activeObstacles.push(obj);
+        }
+    }
+
+    start() {
+        if(this.state === 'PLAYING') return;
+        
+        // Reset Logic
+        this.state = 'PLAYING';
+        this.worldX = 0;
+        this.score = 0;
+        this.player = { x: 130, y: this.GROUND_Y - 36, w: 36, h: 36, vy: 0, rot: 0, onGround: true };
+        
+        // Reset Pool
+        this.activeObstacles.forEach(o => o.active = false);
+        this.activeObstacles = [];
+
+        document.getElementById('ui-status').innerText = "RUNNING...";
+        document.getElementById('ui-status').style.color = "#00ff88";
+
+        this.lastTime = performance.now();
+        cancelAnimationFrame(this.reqId);
+        this.loop(this.lastTime);
+    }
+
+    jump() {
+        if(this.state !== 'PLAYING') return;
+        if(this.player.onGround) {
+            this.player.vy = this.JUMP_VEL;
+            this.player.onGround = false;
+        }
+    }
+
+    die() {
+        this.state = 'DEAD';
+        document.getElementById('ui-status').innerText = "WASTED - TAP START";
+        document.getElementById('ui-status').style.color = "#ff3060";
+    }
+
+    // Level Generator (Infinite for testing Engine limits)
+    generateWorld() {
+        // If the furthest obstacle is too close, spawn more
+        let furthestX = this.activeObstacles.length > 0 ? Math.max(...this.activeObstacles.map(o => o.x)) : this.worldX;
+        
+        if (furthestX < this.worldX + this.W + 400) {
+            let rand = Math.random();
+            let spawnX = (furthestX > this.worldX + this.W) ? furthestX - this.worldX : this.W;
+            
+            if(rand < 0.4) {
+                // Spawn Spike
+                this.spawnObstacle('spike', spawnX + 400, this.GROUND_Y, 26, 32);
+            } else if (rand < 0.7) {
+                // Spawn Platform
+                this.spawnObstacle('platform', spawnX + 450, this.GROUND_Y - 80, 150, 16);
+            } else {
+                // Spawn Gap
+                this.spawnObstacle('gap', spawnX + 500, this.GROUND_Y, 130, this.H - this.GROUND_Y);
+            }
+        }
+    }
+
+    // ENGINE CORE: Physics
+    update(dt) {
+        if(this.state !== 'PLAYING') return;
+
+        this.worldX += this.SPEED * dt;
+        this.score = Math.floor(this.worldX / 10);
+        document.getElementById('ui-score').innerText = `SCORE: ${this.score}`;
+
+        this.generateWorld();
+
+        // Player Physics
+        this.player.vy += this.GRAVITY * dt;
+        if(this.player.vy > 25) this.player.vy = 25; // Max fall speed
+        
+        let prevY = this.player.y;
+        this.player.y += this.player.vy * dt;
+        
+        if(!this.player.onGround) this.player.rot += 15 * dt;
+
+        let onPlatform = false;
+        let overGap = false;
+
+        // Collision Engine (Object Pool iterating)
+        for (let i = this.activeObstacles.length - 1; i >= 0; i--) {
+            let o = this.activeObstacles[i];
+            
+            // Recycle objects that pass behind the screen
+            if (o.x < this.worldX - 200) {
+                o.active = false;
+                this.activeObstacles.splice(i, 1);
+                continue;
+            }
+
+            // Hitboxes
+            let ox = o.x - this.worldX; // Screen X
+            
+            if(o.type === 'gap') {
+                if(this.player.x + 18 > ox && this.player.x + 18 < ox + o.w) overGap = true;
+                continue;
+            }
+
+            let oHX = ox, oHY = o.y, oHW = o.w, oHH = o.h;
+            if(o.type === 'spike') { oHX = ox+6; oHY = o.y-32; oHW = 26; oHH = 32; }
+
+            // AABB Collision Check
+            if (this.player.x < oHX + oHW && this.player.x + this.player.w > oHX &&
+                this.player.y < oHY + oHH && this.player.y + this.player.h > oHY) {
+                
+                if (o.type === 'spike') {
+                    this.die(); return;
+                }
+                if (o.type === 'platform') {
+                    if(prevY + this.player.h <= oHY + 15 && this.player.vy >= 0) {
+                        this.player.y = oHY - this.player.h;
+                        this.player.vy = 0;
+                        this.player.onGround = true;
+                        onPlatform = true;
+                        this.player.rot = Math.round(this.player.rot/90)*90;
+                    } else {
+                        this.die(); return;
+                    }
+                }
+            }
+        }
+
+        // Ground check
+        if (this.player.y + this.player.h >= this.GROUND_Y && !overGap) {
+            this.player.y = this.GROUND_Y - this.player.h;
+            this.player.vy = 0;
+            this.player.onGround = true;
+            this.player.rot = Math.round(this.player.rot/90)*90;
+        } else if (this.player.y > this.H) {
+            this.die(); // Fell in gap
+        } else if (!onPlatform && this.player.y + this.player.h < this.GROUND_Y) {
+            this.player.onGround = false;
+        }
+    }
+
+    // ENGINE CORE: Rendering
+    draw() {
+        // Fast Clear (Black background)
+        this.ctx.fillStyle = '#05080f';
+        this.ctx.fillRect(0, 0, this.W, this.H);
+        
+        // Ground Layer
+        this.ctx.fillStyle = '#080d14';
+        this.ctx.fillRect(0, this.GROUND_Y, this.W, this.H - this.GROUND_Y);
+        this.ctx.fillStyle = '#00f0ff';
+        this.ctx.fillRect(0, this.GROUND_Y - 1, this.W, 3); // Neon line
+
+        // Draw Pool Objects
+        for (let o of this.activeObstacles) {
+            let ox = o.x - this.worldX;
+            if(ox < -100 || ox > this.W + 100) continue;
+
+            if (o.type === 'gap') {
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(ox, this.GROUND_Y, o.w, this.H - this.GROUND_Y);
+            } 
+            else if (o.type === 'spike') {
+                this.ctx.fillStyle = '#ff3060';
+                this.ctx.beginPath();
+                this.ctx.moveTo(ox+19, o.y-38);
+                this.ctx.lineTo(ox+38, o.y);
+                this.ctx.lineTo(ox, o.y);
+                this.ctx.fill();
+            }
+            else if (o.type === 'platform') {
+                this.ctx.fillStyle = '#00ff88';
+                this.ctx.fillRect(ox, o.y, o.w, o.h);
+                this.ctx.fillStyle = '#0d1e2e';
+                this.ctx.fillRect(ox+2, o.y+2, o.w-4, o.h-4);
+            }
+        }
+
+        // Draw Player (with Rotation)
+        this.ctx.save();
+        this.ctx.translate(this.player.x + 18, this.player.y + 18);
+        this.ctx.rotate(this.player.rot * Math.PI / 180);
+        
+        // Cube design
+        this.ctx.fillStyle = (this.state==='DEAD') ? '#ff3060' : '#00f0ff'; 
+        this.ctx.fillRect(-18, -18, 36, 36); 
+        this.ctx.fillStyle = '#05080f'; 
+        this.ctx.fillRect(-14, -14, 28, 28); 
+        
+        this.ctx.restore();
+    }
+
+    // MAIN LOOP
+    loop(timestamp) {
+        let deltaTime = timestamp - this.lastTime;
+        this.lastTime = timestamp;
+        
+        // Cap frame skipping
+        if(deltaTime > 50) deltaTime = 16.66;
+        let dtScale = deltaTime / 16.66;
+
+        this.update(dtScale);
+        this.draw();
+
+        this.reqId = requestAnimationFrame((ts) => this.loop(ts));
+    }
+}
+
+// Initialize Engine
+const gameEngine = new GeoDashEngine('gameCanvas');
+
+</script>
+</body>
+</html>
