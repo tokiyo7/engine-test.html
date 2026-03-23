@@ -17,7 +17,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Courier New', monospace; }
         body { background-color: var(--bg-dark); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 10px; overflow-x: hidden; scroll-behavior: smooth; }
         
-        @keyframes titlePulse { 0% { text-shadow: 0 0 10px #00f0ff; } 100% { text-shadow: 0 0 25px #00f0ff, 0 0 15px #00f0ff; } }
+        @keyframes titlePulse { 0% { text-shadow: 0 0 10px #00f0ff; } 100% { text-shadow: 0 0 30px #00f0ff, 0 0 20px #00f0ff; } }
         @keyframes btnPulse { 0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } 100% { box-shadow: 0 0 25px var(--gold), 0 0 10px var(--gold); } }
 
         .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(5,8,15,0.95); border: 1px solid rgba(0,240,255,0.3); border-radius: 6px; margin-bottom: 10px; box-shadow: 0 0 15px rgba(0,240,255,0.1); }
@@ -31,7 +31,7 @@
         .highlight { color: var(--gold); font-weight: bold; }
         .modal-btn-spin { background: linear-gradient(90deg, #ffd700, #ff8c00); color: #000; border: none; padding: 15px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; animation: btnPulse 1.5s infinite alternate; }
 
-        .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid #00f0ff; background: #05080f; overflow: hidden; border-radius: 4px; transform: translateZ(0); }
+        .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid #00f0ff; background: #05080f; overflow: hidden; border-radius: 4px; transform: translateZ(0); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
         canvas { display: block; width: 100%; height: 100%; }
         
         #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 10px; }
@@ -291,7 +291,7 @@ class GeoDashEngine {
         for(let i=0; i<150; i++) {
             this.particlePool.push({ active:false, x:0, y:0, vx:0, vy:0, life:0, s:0, c:'#00f0ff' });
         }
-        for(let i=0; i<50; i++) {
+        for(let i=0; i<60; i++) {
             this.obstaclePool.push({ active:false, t:'none', x:0, y:0, w:0, h:0, onPlatY:0 });
         }
     }
@@ -309,8 +309,30 @@ class GeoDashEngine {
 
     initPatterns() {
         this.geometryPatterns = [];
-        let curX = 900;
         
+        // 🔥 ACTION-PACKED START (Fixed initial sequence for instant fun) 🔥
+        let startSequence = [
+            {t:'jpad', x: 600}, 
+            {t:'platform', x: 800, y: 180, w: 150}, // Jump pad to high platform
+            {t:'gap', x: 1300, w: 120},
+            {t:'platform', x: 1450, y: 250, w: 150},
+            {t:'spike', x: 1500, onPlatY: 250}, // Spike ON platform
+            {t:'platform', x: 2000, y: 260, w: 100}, // Stairway to Heaven starts
+            {t:'platform', x: 2180, y: 200, w: 100}, 
+            {t:'platform', x: 2360, y: 140, w: 100}, 
+            {t:'spike', x: 2180, onPlatY: this.GROUND_Y}, // Spikes below stairs
+            {t:'spike', x: 2360, onPlatY: this.GROUND_Y},
+            {t:'dspike', x: 2900}
+        ];
+        
+        for(let p of startSequence) {
+            let h = (p.t==='spike'||p.t==='dspike')?32:16;
+            let finalY = p.onPlatY ? p.onPlatY : (p.y ? p.y : this.GROUND_Y);
+            this.geometryPatterns.push({t: p.t, x: p.x, y: finalY, w: p.w||0, h: h, onPlatY: p.onPlatY});
+        }
+
+        // Random chunks for the rest of the level (closer spacing)
+        let curX = 3500;
         let chunks = [
             [{t:'spike', x:0}],
             [{t:'platform', x:0, y:240, w:150}],
@@ -319,9 +341,7 @@ class GeoDashEngine {
             [{t:'dspike', x:0}],
             [{t:'platform', x:0, y:240, w:180}, {t:'spike', x:60, onPlatY:240}], 
             [{t:'gap', x:0, w:120}, {t:'platform', x:180, y:240, w:120}],
-            // 🔥 NEW: Stairway to Heaven (Platforms over spikes) 🔥
-            [{t:'spike', x:0}, {t:'spike', x:250}, {t:'spike', x:500}, 
-             {t:'platform', x:0, y:260, w:100}, {t:'platform', x:220, y:200, w:100}, {t:'platform', x:440, y:140, w:100}],
+            [{t:'spike', x:0}, {t:'spike', x:250}, {t:'platform', x:0, y:260, w:100}, {t:'platform', x:220, y:200, w:100}],
             [{t:'spike', x:0}, {t:'spike', x:300}] 
         ];
         
@@ -335,7 +355,7 @@ class GeoDashEngine {
                 let finalY = p.onPlatY ? p.onPlatY : (p.y ? p.y : this.GROUND_Y);
                 this.geometryPatterns.push({t: p.t, x: curX + p.x, y: finalY, w: p.w||0, h: h, onPlatY: p.onPlatY});
             }
-            curX += 700 + ((r - Math.floor(r)) * 150); 
+            curX += 550 + ((r - Math.floor(r)) * 100); // Tighter spacing for more action
         }
     }
 
@@ -347,19 +367,19 @@ class GeoDashEngine {
         }
     }
 
-    // 🔥 NEW: Jump Dust Effect 🔥
+    // 🔥 BIGGER JUMP DUST 🔥
     spawnJumpDust() {
-        for(let i=0; i<6; i++) {
+        for(let i=0; i<8; i++) {
             let p = this.particlePool.find(obj => !obj.active);
             if(p) {
                 p.active=true; 
                 p.x = this.player.x + 18; 
-                p.y = this.player.y + 36; // At bottom of cube
-                p.vx = (Math.random() - 0.5) * 8; 
-                p.vy = -(Math.random() * 4);
+                p.y = this.player.y + 36; 
+                p.vx = (Math.random() - 0.5) * 10; 
+                p.vy = -(Math.random() * 5);
                 p.life = 1.0; 
-                p.s = 3 + Math.random() * 3; 
-                p.c = '#ffffff'; // White dust
+                p.s = 4 + Math.random() * 4; 
+                p.c = '#ffffff'; 
             }
         }
     }
@@ -422,7 +442,7 @@ class GeoDashEngine {
         if(this.player.ground){ 
             this.player.vy=this.JUMP_VEL; 
             this.player.ground=false; 
-            this.spawnJumpDust(); // Spawn dust!
+            this.spawnJumpDust(); 
             playJump(); 
         }
     }
@@ -445,7 +465,6 @@ class GeoDashEngine {
     }
 
     update(dt) {
-        // Particles
         for(let p of this.particlePool){ 
             if(p.active){ 
                 p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=0.6*dt; p.life-=0.03*dt; 
@@ -453,7 +472,6 @@ class GeoDashEngine {
             } 
         }
 
-        // Background Stars Parallax
         for(let s of this.stars) {
             if(this.state === 'PLAYING') s.x -= s.speed * this.SPEED * dt;
             if(s.x < 0) { s.x = this.W; s.y = Math.random() * this.GROUND_Y; }
@@ -464,11 +482,11 @@ class GeoDashEngine {
         this.frameCount += dt; 
         this.worldX += this.SPEED*dt;
 
-        // 🔥 NEW: Ghost Trail Logic 🔥
-        if(Math.floor(this.frameCount) % 3 === 0) {
+        // 🔥 THICKER & LONGER GHOST TRAIL 🔥
+        if(Math.floor(this.frameCount) % 2 === 0) {
             this.trail.push({x: this.player.x, y: this.player.y, rot: this.player.rot, life: 1.0});
         }
-        for(let t of this.trail) t.life -= 0.1 * dt;
+        for(let t of this.trail) t.life -= 0.05 * dt; // Decreased fade speed so it's longer
         this.trail = this.trail.filter(t => t.life > 0);
 
         if(Math.floor(this.frameCount)%30===0){
@@ -549,10 +567,9 @@ class GeoDashEngine {
         this.ctx.fillStyle='#05080f'; 
         this.ctx.fillRect(0,0,this.W,this.H); 
         
-        // Draw Stars
         this.ctx.fillStyle = '#ffffff';
         for(let s of this.stars) {
-            this.ctx.globalAlpha = Math.random() * 0.5 + 0.3; // Twinkle
+            this.ctx.globalAlpha = Math.random() * 0.5 + 0.3; 
             this.ctx.fillRect(s.x, s.y, s.s, s.s);
         }
         this.ctx.globalAlpha = 1.0;
@@ -614,13 +631,12 @@ class GeoDashEngine {
                 this.ctx.save();
                 this.ctx.translate(t.x+18, t.y+18);
                 this.ctx.rotate(t.rot * Math.PI / 180);
-                this.ctx.fillStyle = `rgba(0, 240, 255, ${t.life * 0.4})`; // Fading Cyan
+                this.ctx.fillStyle = `rgba(0, 240, 255, ${t.life * 0.5})`; 
                 this.ctx.fillRect(-18, -18, 36, 36);
                 this.ctx.restore();
             }
         }
 
-        // Draw Particles
         for(let p of this.particlePool){ 
             if(p.active){ 
                 this.ctx.fillStyle=p.c; 
@@ -630,15 +646,22 @@ class GeoDashEngine {
         }
         this.ctx.globalAlpha=1.0;
 
-        // Draw Player
+        // 🔥 SUPER NEON GLOW CUBE 🔥
         if(this.state!=='DEAD'){
             this.ctx.save();
             this.ctx.translate(this.player.x+18, this.player.y+18);
             this.ctx.rotate(this.player.rot*Math.PI/180);
+            
+            this.ctx.shadowBlur = 20; // GLOW ADDED!
+            this.ctx.shadowColor = '#00f0ff';
+            
             this.ctx.fillStyle=(this.state==='CLEAR')?'#00ff88':'#00f0ff'; 
             this.ctx.fillRect(-18,-18,36,36); 
+            
+            this.ctx.shadowBlur = 0; // Turn off glow for inner square
             this.ctx.fillStyle='#05080f'; 
             this.ctx.fillRect(-14,-14,28,28); 
+            
             this.ctx.fillStyle='#00f0ff'; 
             this.ctx.fillRect(-8,-6,4,4); 
             this.ctx.fillRect(4,-6,4,4); 
