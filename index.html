@@ -8,7 +8,7 @@
     <meta property="og:description" content="Geometry Dash on Arbitrum! Play 10 levels, spin to win ARB tokens. Season 1 live now!">
     <meta property="og:image" content="https://geodash-amber.vercel.app/preview.png">
     <meta property="og:url" content="https://geodash-amber.vercel.app">
-    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://geodash-amber.vercel.app/preview.png","button":{"title":"🎮 Play GeoDash","action":{"type":"launch_frame","name":"GeoDash","url":"https://geodash-amber.vercel.app","splashImageUrl":"https://geodash-amber.vercel.app/icon.png","splashBackgroundColor":"#05080f"}}}' />
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://geodash-amber.vercel.app/preview.png","button":{"title":"🎮 Play GeoDash 2.0","action":{"type":"launch_frame","name":"GeoDash","url":"https://geodash-amber.vercel.app","splashImageUrl":"https://geodash-amber.vercel.app/icon.png","splashBackgroundColor":"#05080f"}}}' />
     <meta name="theme-color" content="#05080f">
     <link rel="icon" href="https://geodash-amber.vercel.app/icon.png">
 
@@ -24,7 +24,6 @@
         .title { color: #00f0ff; font-size: 22px; font-weight: bold; letter-spacing: 3px; animation: titlePulse 1.5s infinite alternate; }
         .stats { color: #ff3060; font-size: 14px; font-weight: bold; text-align: right; }
 
-        /* 🔥 WELCOME POPUP MODAL 🔥 */
         #welcomeModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,8,15,0.92); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .modal-content { background: #0a0f18; border: 2px solid var(--cyan); border-radius: 12px; padding: 25px; max-width: 90%; width: 400px; text-align: center; box-shadow: 0 0 30px rgba(0,240,255,0.2); }
         .modal-title { color: #00f0ff; font-size: 24px; margin-bottom: 15px; font-weight: bold; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
@@ -32,7 +31,6 @@
         .highlight { color: var(--gold); font-weight: bold; }
         .modal-btn-spin { background: linear-gradient(90deg, #ffd700, #ff8c00); color: #000; border: none; padding: 15px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; animation: btnPulse 1.5s infinite alternate; }
 
-        /* GAME CANVAS */
         .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid #00f0ff; background: #05080f; overflow: hidden; border-radius: 4px; transform: translateZ(0); }
         canvas { display: block; width: 100%; height: 100%; }
         
@@ -116,6 +114,7 @@
         <button class="modal-btn-spin" onclick="scrollToSpin()">🎰 TAKE ME TO FREE SPIN!</button>
     </div>
 </div>
+
 <div class="toast" id="toast">Message</div>
 
 <div class="header">
@@ -272,12 +271,16 @@ class GeoDashEngine {
 
         this.player = { x: 130, y: this.GROUND_Y - 36, w: 36, h: 36, vy: 0, rot: 0, prevY: 0, ground: true };
         
+        // 📦 POOLS & EFFECTS
         this.obstaclePool = []; 
         this.activeObstacles = [];
         this.particlePool = []; 
-        this.activeParticles = [];
+        
+        this.trail = []; // Ghost Trail array
+        this.stars = []; // Background stars
         
         this.initPools();
+        this.initStars();
 
         window.addEventListener('keydown', (e) => { if(e.code === 'Space') this.jump(); });
         this.canvas.addEventListener('mousedown', () => this.jump());
@@ -285,11 +288,22 @@ class GeoDashEngine {
     }
 
     initPools() {
-        for(let i=0; i<100; i++) {
+        for(let i=0; i<150; i++) {
             this.particlePool.push({ active:false, x:0, y:0, vx:0, vy:0, life:0, s:0, c:'#00f0ff' });
         }
         for(let i=0; i<50; i++) {
             this.obstaclePool.push({ active:false, t:'none', x:0, y:0, w:0, h:0, onPlatY:0 });
+        }
+    }
+
+    initStars() {
+        for(let i=0; i<30; i++) {
+            this.stars.push({
+                x: Math.random() * this.W,
+                y: Math.random() * this.GROUND_Y,
+                s: Math.random() * 2 + 1,
+                speed: Math.random() * 0.5 + 0.1
+            });
         }
     }
 
@@ -305,7 +319,9 @@ class GeoDashEngine {
             [{t:'dspike', x:0}],
             [{t:'platform', x:0, y:240, w:180}, {t:'spike', x:60, onPlatY:240}], 
             [{t:'gap', x:0, w:120}, {t:'platform', x:180, y:240, w:120}],
-            [{t:'platform', x:0, y:200, w:120}, {t:'platform', x:180, y:160, w:120}], 
+            // 🔥 NEW: Stairway to Heaven (Platforms over spikes) 🔥
+            [{t:'spike', x:0}, {t:'spike', x:250}, {t:'spike', x:500}, 
+             {t:'platform', x:0, y:260, w:100}, {t:'platform', x:220, y:200, w:100}, {t:'platform', x:440, y:140, w:100}],
             [{t:'spike', x:0}, {t:'spike', x:300}] 
         ];
         
@@ -319,7 +335,7 @@ class GeoDashEngine {
                 let finalY = p.onPlatY ? p.onPlatY : (p.y ? p.y : this.GROUND_Y);
                 this.geometryPatterns.push({t: p.t, x: curX + p.x, y: finalY, w: p.w||0, h: h, onPlatY: p.onPlatY});
             }
-            curX += 650 + ((r - Math.floor(r)) * 150); 
+            curX += 700 + ((r - Math.floor(r)) * 150); 
         }
     }
 
@@ -331,8 +347,25 @@ class GeoDashEngine {
         }
     }
 
+    // 🔥 NEW: Jump Dust Effect 🔥
+    spawnJumpDust() {
+        for(let i=0; i<6; i++) {
+            let p = this.particlePool.find(obj => !obj.active);
+            if(p) {
+                p.active=true; 
+                p.x = this.player.x + 18; 
+                p.y = this.player.y + 36; // At bottom of cube
+                p.vx = (Math.random() - 0.5) * 8; 
+                p.vy = -(Math.random() * 4);
+                p.life = 1.0; 
+                p.s = 3 + Math.random() * 3; 
+                p.c = '#ffffff'; // White dust
+            }
+        }
+    }
+
     spawnDeathExplosion() {
-        for(let i=0; i<30; i++) {
+        for(let i=0; i<40; i++) {
             let p = this.particlePool.find(obj => !obj.active);
             if(p) {
                 p.active=true; 
@@ -356,6 +389,7 @@ class GeoDashEngine {
         this.worldX = 0; 
         this.frameCount = 0;
         this.player = { x: 130, y: this.GROUND_Y - 36, w: 36, h: 36, vy: 0, rot: 0, prevY:0, ground: true };
+        this.trail = [];
         
         this.activeObstacles.forEach(o=>o.active=false); 
         this.activeObstacles=[];
@@ -388,6 +422,7 @@ class GeoDashEngine {
         if(this.player.ground){ 
             this.player.vy=this.JUMP_VEL; 
             this.player.ground=false; 
+            this.spawnJumpDust(); // Spawn dust!
             playJump(); 
         }
     }
@@ -410,6 +445,7 @@ class GeoDashEngine {
     }
 
     update(dt) {
+        // Particles
         for(let p of this.particlePool){ 
             if(p.active){ 
                 p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=0.6*dt; p.life-=0.03*dt; 
@@ -417,15 +453,27 @@ class GeoDashEngine {
             } 
         }
 
+        // Background Stars Parallax
+        for(let s of this.stars) {
+            if(this.state === 'PLAYING') s.x -= s.speed * this.SPEED * dt;
+            if(s.x < 0) { s.x = this.W; s.y = Math.random() * this.GROUND_Y; }
+        }
+
         if(this.state!=='PLAYING') return;
         
         this.frameCount += dt; 
         this.worldX += this.SPEED*dt;
 
+        // 🔥 NEW: Ghost Trail Logic 🔥
+        if(Math.floor(this.frameCount) % 3 === 0) {
+            this.trail.push({x: this.player.x, y: this.player.y, rot: this.player.rot, life: 1.0});
+        }
+        for(let t of this.trail) t.life -= 0.1 * dt;
+        this.trail = this.trail.filter(t => t.life > 0);
+
         if(Math.floor(this.frameCount)%30===0){
             let prog = Math.min(100,(this.worldX/this.levelLength)*100);
             document.getElementById('progressBar').style.width=prog+'%';
-            
             let progressBonus = Math.floor((this.worldX/this.levelLength) * this.currentLevel * 50);
             document.getElementById('scoreUI').innerText=`Score: ${window.baseScore + progressBonus}`;
         }
@@ -465,6 +513,7 @@ class GeoDashEngine {
                 if(o.t==='jpad'){ 
                     this.player.vy=this.JUMP_VEL*1.3; 
                     this.player.ground=false; 
+                    this.spawnJumpDust();
                     playJump(); 
                 }
                 if(o.t==='platform'){
@@ -499,6 +548,15 @@ class GeoDashEngine {
     draw() {
         this.ctx.fillStyle='#05080f'; 
         this.ctx.fillRect(0,0,this.W,this.H); 
+        
+        // Draw Stars
+        this.ctx.fillStyle = '#ffffff';
+        for(let s of this.stars) {
+            this.ctx.globalAlpha = Math.random() * 0.5 + 0.3; // Twinkle
+            this.ctx.fillRect(s.x, s.y, s.s, s.s);
+        }
+        this.ctx.globalAlpha = 1.0;
+
         this.ctx.fillStyle='#080d14'; 
         this.ctx.fillRect(0,this.GROUND_Y,this.W,this.H-this.GROUND_Y);
         this.ctx.fillStyle='#00f0ff'; 
@@ -550,6 +608,19 @@ class GeoDashEngine {
             }
         }
 
+        // Draw Ghost Trail
+        if(this.state !== 'DEAD') {
+            for(let t of this.trail) {
+                this.ctx.save();
+                this.ctx.translate(t.x+18, t.y+18);
+                this.ctx.rotate(t.rot * Math.PI / 180);
+                this.ctx.fillStyle = `rgba(0, 240, 255, ${t.life * 0.4})`; // Fading Cyan
+                this.ctx.fillRect(-18, -18, 36, 36);
+                this.ctx.restore();
+            }
+        }
+
+        // Draw Particles
         for(let p of this.particlePool){ 
             if(p.active){ 
                 this.ctx.fillStyle=p.c; 
@@ -559,6 +630,7 @@ class GeoDashEngine {
         }
         this.ctx.globalAlpha=1.0;
 
+        // Draw Player
         if(this.state!=='DEAD'){
             this.ctx.save();
             this.ctx.translate(this.player.x+18, this.player.y+18);
