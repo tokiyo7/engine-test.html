@@ -15,76 +15,78 @@
     <style>
         :root { --bg-dark: #05080f; --cyan: #00f0ff; --red: #ff3060; --gold: #ffd700; --emerald: #00ff88; }
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Courier New', monospace; }
-        body { background-color: var(--bg-dark); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 10px; overflow-x: hidden; scroll-behavior: smooth; }
+        body { background-color: var(--bg-dark); color: #fff; display: flex; flex-direction: column; align-items: center; padding: 12px; overflow-x: hidden; scroll-behavior: smooth; }
         
-        @keyframes titlePulse { 0% { text-shadow: 0 0 10px #00f0ff; } 100% { text-shadow: 0 0 30px #00f0ff, 0 0 20px #00f0ff; } }
-        @keyframes btnPulse { 0% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } 100% { box-shadow: 0 0 25px var(--gold), 0 0 10px var(--gold); } }
+        @keyframes titlePulse { 0% { text-shadow: 0 0 8px #00f0ff; } 100% { text-shadow: 0 0 15px #00f0ff, 0 0 8px #00f0ff; } }
+        @keyframes btnPulse { 0% { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); } 100% { box-shadow: 0 0 15px var(--gold), 0 0 8px var(--gold); } }
 
-        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(5,8,15,0.95); border: 1px solid rgba(0,240,255,0.3); border-radius: 6px; margin-bottom: 10px; box-shadow: 0 0 15px rgba(0,240,255,0.1); }
-        .title { color: #00f0ff; font-size: 22px; font-weight: bold; letter-spacing: 3px; animation: titlePulse 1.5s infinite alternate; }
+        /* 🔥 PREMIUM UI UPGRADES 🔥 */
+        .header { width: 100%; max-width: 800px; display: flex; justify-content: space-between; padding: 12px 18px; background: linear-gradient(90deg, rgba(10,15,24,0.9), rgba(0,240,255,0.05)); border: 1px solid rgba(0,240,255,0.2); border-radius: 12px; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .title { color: #00f0ff; font-size: 22px; font-weight: bold; letter-spacing: 2px; animation: titlePulse 2s infinite alternate; }
         .stats { color: #ff3060; font-size: 14px; font-weight: bold; text-align: right; }
 
-        #welcomeModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,8,15,0.92); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-        .modal-content { background: #0a0f18; border: 2px solid var(--cyan); border-radius: 12px; padding: 25px; max-width: 90%; width: 400px; text-align: center; box-shadow: 0 0 30px rgba(0,240,255,0.2); }
-        .modal-title { color: #00f0ff; font-size: 24px; margin-bottom: 15px; font-weight: bold; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
-        .modal-text { font-size: 14px; color: #ccc; line-height: 1.6; margin-bottom: 12px; text-align: left; }
+        #welcomeModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5,8,15,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
+        .modal-content { background: linear-gradient(180deg, #0a0f18, #05080f); border: 1px solid var(--cyan); border-radius: 16px; padding: 30px; max-width: 90%; width: 420px; text-align: center; box-shadow: 0 10px 40px rgba(0,240,255,0.15); }
+        .modal-title { color: #00f0ff; font-size: 26px; margin-bottom: 15px; font-weight: bold; text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+        .modal-text { font-size: 14px; color: #d0d0d0; line-height: 1.7; margin-bottom: 15px; text-align: left; }
         .highlight { color: var(--gold); font-weight: bold; }
-        .modal-btn-spin { background: linear-gradient(90deg, #ffd700, #ff8c00); color: #000; border: none; padding: 15px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; animation: btnPulse 1.5s infinite alternate; }
+        .modal-btn-spin { background: linear-gradient(90deg, #ffd700, #ff8c00); color: #000; border: none; padding: 16px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 10px; animation: btnPulse 1.5s infinite alternate; transition: transform 0.2s; }
+        .modal-btn-spin:active { transform: scale(0.95); }
 
-        .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid #00f0ff; background: #05080f; overflow: hidden; border-radius: 4px; transform: translateZ(0); box-shadow: 0 0 20px rgba(0,240,255,0.1); }
+        .game-container { position: relative; width: 100%; max-width: 800px; aspect-ratio: 2/1; border: 2px solid #00f0ff; background: #05080f; overflow: hidden; border-radius: 8px; transform: translateZ(0); box-shadow: 0 8px 30px rgba(0,0,0,0.8); }
         canvas { display: block; width: 100%; height: 100%; }
         
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.88); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 10px; }
-        #overlay h1 { font-size: 28px; margin-bottom: 8px; text-shadow: 0 0 20px currentColor; animation: pulse 0.6s ease infinite alternate; }
-        #overlay p { font-size: 14px; margin-bottom: 15px; color: #ffd700; white-space: pre-line; line-height: 1.4; }
-        .btn-large { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 8px; letter-spacing: 1px; width: 85%; max-width: 300px; margin-bottom: 8px; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; text-align: center; padding: 10px; backdrop-filter: blur(3px); }
+        #overlay h1 { font-size: 32px; margin-bottom: 10px; text-shadow: 0 0 15px currentColor; animation: pulse 0.6s ease infinite alternate; }
+        #overlay p { font-size: 15px; margin-bottom: 20px; color: #ffd700; white-space: pre-line; line-height: 1.5; }
+        .btn-large { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #000; border: none; padding: 14px 20px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 8px; letter-spacing: 1px; width: 85%; max-width: 300px; margin-bottom: 10px; }
         .btn-social { background: linear-gradient(135deg, #8a2be2, #4a00e0); color: #fff; }
 
-        .progress-bar-wrap { width: 100%; max-width: 800px; display: flex; align-items: center; margin: 10px 0; background: #0a0f18; border: 1px solid rgba(0,240,255,0.3); border-radius: 6px; padding: 5px; }
-        .progress-bar { height: 14px; background: #00f0ff; width: 0%; box-shadow: 0 0 10px #00f0ff; border-radius: 4px; }
-        .progress-text { margin-left: 15px; color: var(--cyan); font-weight: bold; white-space: nowrap; }
+        .progress-bar-wrap { width: 100%; max-width: 800px; display: flex; align-items: center; margin: 15px 0; background: rgba(10,15,24,0.8); border: 1px solid rgba(0,240,255,0.2); border-radius: 8px; padding: 6px; }
+        .progress-bar { height: 12px; background: linear-gradient(90deg, #00f0ff, #00ff88); width: 0%; box-shadow: 0 0 10px rgba(0,240,255,0.5); border-radius: 6px; transition: width 0.1s linear; }
+        .progress-text { margin-left: 15px; color: var(--cyan); font-weight: bold; white-space: nowrap; font-size: 13px; }
 
-        .level-selector { width: 100%; max-width: 800px; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .lvl-btn { flex: 1; min-width: 45px; padding: 10px 0; text-align: center; font-weight: bold; border-radius: 4px; border: 1px solid #1a2332; background: #0a0f18; color: #2a3a4a; cursor: not-allowed; }
-        .lvl-btn.unlocked { background: transparent; border-color: #00f0ff; color: #00f0ff; cursor: pointer; }
-        .lvl-btn.active { background: #00f0ff; color: #000; box-shadow: 0 0 15px #00f0ff; }
-        .lvl-btn.done { background: rgba(0,255,136,0.08); border-color: #00ff88; color: #00ff88; cursor: pointer; }
+        .level-selector { width: 100%; max-width: 800px; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+        .lvl-btn { flex: 1; min-width: 45px; padding: 12px 0; text-align: center; font-weight: bold; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(10,15,24,0.6); color: #4a5a6a; cursor: not-allowed; transition: all 0.2s; }
+        .lvl-btn.unlocked { background: rgba(0,240,255,0.05); border-color: rgba(0,240,255,0.3); color: #00f0ff; cursor: pointer; }
+        .lvl-btn.active { background: #00f0ff; color: #000; border-color: #00f0ff; box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+        .lvl-btn.done { background: rgba(0,255,136,0.1); border-color: rgba(0,255,136,0.4); color: #00ff88; cursor: pointer; }
 
-        .play-btn-row { width: 100%; max-width: 800px; margin-bottom: 5px; display: flex; gap: 10px; }
-        .play-btn { flex: 1; padding: 14px; background: transparent; border: 2px solid #00f0ff; color: #00f0ff; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 6px; font-family: 'Courier New', monospace; }
-        .play-btn:hover { background: #00f0ff; color: #000; box-shadow: 0 0 20px #00f0ff; }
-        .play-btn-gold { border-color: var(--gold); color: var(--gold); animation: btnPulse 1.5s infinite alternate; } 
-        .play-btn-gold:hover:not(:disabled) { background: var(--gold); color: #000; box-shadow: 0 0 20px var(--gold); }
-        .play-btn-gold:disabled { border-color: #555; color: #888; background: transparent; cursor: not-allowed; animation: none; }
-        .btn-note { font-size: 11px; color: #888; text-align: center; width: 100%; margin-bottom: 20px; }
+        .play-btn-row { width: 100%; max-width: 800px; margin-bottom: 8px; display: flex; gap: 12px; }
+        .play-btn { flex: 1; padding: 16px; background: rgba(0,240,255,0.05); border: 1px solid #00f0ff; color: #00f0ff; font-size: 14px; font-weight: bold; cursor: pointer; border-radius: 8px; font-family: 'Courier New', monospace; transition: all 0.2s; }
+        .play-btn:hover { background: #00f0ff; color: #000; box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+        .play-btn-gold { background: rgba(255,215,0,0.05); border-color: var(--gold); color: var(--gold); animation: btnPulse 2s infinite alternate; } 
+        .play-btn-gold:hover:not(:disabled) { background: var(--gold); color: #000; box-shadow: 0 0 15px rgba(255,215,0,0.5); }
+        .play-btn-gold:disabled { border-color: #444; color: #666; background: transparent; cursor: not-allowed; animation: none; }
+        .btn-note { font-size: 11px; color: #777; text-align: center; width: 100%; margin-bottom: 25px; }
 
-        .prize-chart { width: 100%; max-width: 800px; border: 1px solid rgba(255,215,0,0.25); border-radius: 8px; padding: 16px; background: rgba(8,6,0,0.95); margin-bottom: 12px; }
-        .prize-chart-title { color: #ffd700; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 14px; letter-spacing: 2px; text-shadow: 0 0 8px #ffd700; }
-        .prize-section-label { color: #888; font-size: 11px; letter-spacing: 1px; margin: 10px 0 6px; text-align: center; text-transform: uppercase; }
+        .prize-chart { width: 100%; max-width: 800px; border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 18px; background: linear-gradient(180deg, rgba(15,12,0,0.9), rgba(5,5,5,0.95)); margin-bottom: 15px; box-shadow: inset 0 0 20px rgba(255,215,0,0.02); }
+        .prize-chart-title { color: #ffd700; font-size: 15px; font-weight: bold; text-align: center; margin-bottom: 14px; letter-spacing: 2px; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
+        .prize-section-label { color: #888; font-size: 11px; letter-spacing: 1px; margin: 10px 0 8px; text-align: center; text-transform: uppercase; }
         .prize-table { width: 100%; border-collapse: collapse; font-size: 12px; font-family: 'Courier New', monospace; }
-        .prize-table th { color: #444; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-bottom: 1px solid #1a2332; text-align: left; }
-        .prize-table td { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .prize-table th { color: #555; font-size: 10px; letter-spacing: 1px; padding: 4px 8px; border-bottom: 1px solid #222; text-align: left; }
+        .prize-table td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.02); }
         .prize-table tr.t-rare td { color: var(--cyan); }
         .prize-table tr.t-legend td { color: var(--gold); font-weight: bold; }
 
-        .slot-machine { width: 100%; max-width: 800px; border: 2px solid var(--gold); border-radius: 8px; padding: 20px; text-align: center; background: linear-gradient(180deg, #1a1a10, #0d1100); margin-bottom: 20px; }
-        .slot-title { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 15px; }
-        .reels-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .reel { width: 80px; height: 80px; background: #000; border: 2px solid #fff; border-radius: 8px; font-size: 45px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .slot-machine { width: 100%; max-width: 800px; border: 1px solid rgba(255,215,0,0.3); border-radius: 12px; padding: 25px; text-align: center; background: linear-gradient(180deg, #15130a, #0a0a05); margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
+        .slot-title { color: var(--gold); font-size: 22px; font-weight: bold; margin-bottom: 18px; letter-spacing: 1px; }
+        .reels-container { display: flex; justify-content: center; gap: 15px; margin-bottom: 22px; }
+        .reel { width: 80px; height: 80px; background: #000; border: 2px solid #333; border-radius: 10px; font-size: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; box-shadow: inset 0 0 15px rgba(255,255,255,0.1); }
         .reel-inner { position: absolute; transition: top 0.1s; }
-        .spinning { filter: blur(3px); animation: fastSpin 0.1s infinite; }
+        .spinning { filter: blur(2px); animation: fastSpin 0.1s infinite; }
         @keyframes fastSpin { 0% { transform: translateY(-40px); } 100% { transform: translateY(40px); } }
-        .spin-btn { background: var(--gold); color: #000; border: none; padding: 12px 25px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 4px; width: 100%; max-width: 300px; }
-        .spin-btn:disabled { background: #555 !important; color: #222 !important; cursor: not-allowed; }
-        .slot-info { font-size: 14px; color: #ccc; margin-top: 5px; }
-        .cast-btn-small { background: #8a2be2; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size:12px; margin-top: 10px; display:none; }
+        .spin-btn { background: var(--gold); color: #000; border: none; padding: 14px 25px; font-size: 18px; font-weight: bold; cursor: pointer; border-radius: 8px; width: 100%; max-width: 300px; box-shadow: 0 4px 10px rgba(255,215,0,0.2); }
+        .spin-btn:disabled { background: #333 !important; color: #666 !important; box-shadow: none; cursor: not-allowed; }
+        .slot-info { font-size: 13px; color: #aaa; margin-top: 8px; }
+        .cast-btn-small { background: linear-gradient(90deg, #8a2be2, #4a00e0); color: #fff; border: none; padding: 8px 15px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size:12px; margin-top: 12px; display:none; }
 
-        .leaderboard { width: 100%; max-width: 800px; border: 1px solid var(--cyan); border-radius: 4px; padding: 15px; background: rgba(13,17,23,0.9); }
-        .lb-title { color: var(--cyan); text-align: center; font-weight: bold; margin-bottom: 15px; font-size: 18px; }
-        .lb-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #222; font-size: 14px; }
-        #walletStatus { font-size: 12px; color: #888; margin-top: 20px; text-align: center; margin-bottom: 40px; }
+        .leaderboard { width: 100%; max-width: 800px; border: 1px solid rgba(0,240,255,0.2); border-radius: 12px; padding: 20px; background: linear-gradient(180deg, rgba(10,15,24,0.9), rgba(5,8,15,0.95)); box-shadow: inset 0 0 20px rgba(0,240,255,0.02); }
+        .lb-title { color: var(--cyan); text-align: center; font-weight: bold; margin-bottom: 18px; font-size: 18px; letter-spacing: 1px; }
+        .lb-row { display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 13px; border-radius: 6px; margin-bottom: 4px; }
+        #walletStatus { font-size: 12px; color: #666; margin-top: 25px; text-align: center; margin-bottom: 40px; letter-spacing: 1px; }
         
-        .toast { position: fixed; top: 20px; right: 20px; background: #222; color: #fff; padding: 15px; border-left: 4px solid var(--cyan); display: none; z-index: 1000; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .toast { position: fixed; top: 20px; right: 20px; background: rgba(20,25,35,0.95); color: #fff; padding: 15px 20px; border-left: 4px solid var(--cyan); display: none; z-index: 1000; box-shadow: 0 8px 25px rgba(0,0,0,0.5); border-radius: 4px; font-size: 14px; backdrop-filter: blur(5px); }
     </style>
     
     <script type="module">
@@ -97,7 +99,7 @@
                 if (context && context.user) {
                     window.fcUsername = context.user.username || null;
                     const titleEl = document.getElementById('mainTitle');
-                    if(titleEl && window.fcUsername) titleEl.innerHTML = `GEODASH <span style="font-size:12px;color:#888;">@${window.fcUsername}</span>`;
+                    if(titleEl && window.fcUsername) titleEl.innerHTML = `GEODASH <span style="font-size:12px;color:#888;letter-spacing:0;">@${window.fcUsername}</span>`;
                 }
             }).catch(()=>{});
         } catch(e) {}
@@ -121,7 +123,7 @@
     <div class="title" id="mainTitle">GEODASH</div>
     <div class="stats">
         <div id="attemptUI">Attempt: 0</div>
-        <div id="scoreUI">Score: 0</div>
+        <div id="scoreUI" style="color:var(--gold);">Score: 0</div>
     </div>
 </div>
 
@@ -131,7 +133,7 @@
         <h1 id="overlayTitle">LEVEL CLEAR!</h1>
         <p id="overlaySub">Data saved on-chain.</p>
         <button class="btn-large btn-social" id="overlayCastBtn">📢 SHARE TO CLAIM ARB</button>
-        <button class="btn-large" id="overlayBtn" style="margin-top:15px; font-size:14px; padding:10px 20px;">Return to Menu</button>
+        <button class="btn-large" id="overlayBtn" style="margin-top:15px; font-size:14px; padding:10px 20px; background: #222; color: #fff;">Return to Menu</button>
     </div>
 </div>
 
@@ -157,7 +159,7 @@
         <tr class="t-rare"><td>(Common)</td><td>0.001 — 0.05 ARB</td></tr>
         <tr class="t-legend"><td>(Jackpot!)</td><td>0.05 — 0.50 ARB</td></tr>
     </table>
-    <div style="text-align:center; color:#222; font-size:11px; margin:8px 0;">————————————</div>
+    <div style="text-align:center; color:#333; font-size:11px; margin:10px 0;">————————————</div>
     <div class="prize-section-label">🏆 LEVEL CLEAR REWARDS (Manual Claim)</div>
     <table class="prize-table">
         <tr><th>Level</th><th>Prize Amount</th></tr>
@@ -185,9 +187,9 @@
 
 <div class="leaderboard">
     <div class="lb-title">🌍 GLOBAL TOP 10</div>
-    <div id="globalLbContent" style="margin-bottom:15px;">Loading...</div>
+    <div id="globalLbContent" style="margin-bottom:20px;">Loading...</div>
     
-    <div class="lb-title" style="font-size:14px; color:var(--gold); margin-bottom:10px;">👤 YOUR ON-CHAIN STATS</div>
+    <div class="lb-title" style="font-size:14px; color:var(--gold); margin-bottom:12px;">👤 YOUR ON-CHAIN STATS</div>
     <div id="lbContent">Connect wallet to load...</div>
 </div>
 
@@ -271,7 +273,6 @@ class GeoDashEngine {
 
         this.player = { x: 130, y: this.GROUND_Y - 36, w: 36, h: 36, vy: 0, rot: 0, prevY: 0, ground: true };
         
-        // 📦 POOLS & EFFECTS
         this.obstaclePool = []; 
         this.activeObstacles = [];
         this.particlePool = []; 
@@ -302,7 +303,7 @@ class GeoDashEngine {
                 x: Math.random() * this.W,
                 y: Math.random() * this.GROUND_Y,
                 s: Math.random() * 2 + 1,
-                speed: Math.random() * 0.5 + 0.1
+                speed: Math.random() * 0.4 + 0.1
             });
         }
     }
@@ -310,19 +311,19 @@ class GeoDashEngine {
     initPatterns() {
         this.geometryPatterns = [];
         
-        // 🔥 ACTION-PACKED START (Fixed initial sequence for instant fun) 🔥
+        // 🔥 ACTION-PACKED START (Tight but completely fair) 🔥
         let startSequence = [
-            {t:'jpad', x: 600}, 
-            {t:'platform', x: 800, y: 180, w: 150}, // Jump pad to high platform
-            {t:'gap', x: 1300, w: 120},
-            {t:'platform', x: 1450, y: 250, w: 150},
-            {t:'spike', x: 1500, onPlatY: 250}, // Spike ON platform
-            {t:'platform', x: 2000, y: 260, w: 100}, // Stairway to Heaven starts
-            {t:'platform', x: 2180, y: 200, w: 100}, 
-            {t:'platform', x: 2360, y: 140, w: 100}, 
-            {t:'spike', x: 2180, onPlatY: this.GROUND_Y}, // Spikes below stairs
-            {t:'spike', x: 2360, onPlatY: this.GROUND_Y},
-            {t:'dspike', x: 2900}
+            {t:'jpad', x: 500}, 
+            {t:'platform', x: 700, y: 180, w: 150},
+            {t:'gap', x: 1050, w: 120},
+            {t:'platform', x: 1250, y: 250, w: 180},
+            {t:'spike', x: 1320, onPlatY: 250}, // Spike ON platform
+            {t:'platform', x: 1750, y: 260, w: 90}, // Fast Stairs
+            {t:'platform', x: 1900, y: 200, w: 90}, 
+            {t:'platform', x: 2050, y: 140, w: 90}, 
+            {t:'spike', x: 1900, onPlatY: this.GROUND_Y}, // Spikes below stairs
+            {t:'spike', x: 2050, onPlatY: this.GROUND_Y},
+            {t:'dspike', x: 2550}
         ];
         
         for(let p of startSequence) {
@@ -331,18 +332,16 @@ class GeoDashEngine {
             this.geometryPatterns.push({t: p.t, x: p.x, y: finalY, w: p.w||0, h: h, onPlatY: p.onPlatY});
         }
 
-        // Random chunks for the rest of the level (closer spacing)
-        let curX = 3500;
+        // Random chunks for the rest of the level (TIGHTER SPACING: 450px base gap)
+        let curX = 3100;
         let chunks = [
             [{t:'spike', x:0}],
-            [{t:'platform', x:0, y:240, w:150}],
-            [{t:'gap', x:0, w:130}],
-            [{t:'jpad', x:0}, {t:'platform', x:250, y:180, w:120}],
-            [{t:'dspike', x:0}],
-            [{t:'platform', x:0, y:240, w:180}, {t:'spike', x:60, onPlatY:240}], 
             [{t:'gap', x:0, w:120}, {t:'platform', x:180, y:240, w:120}],
-            [{t:'spike', x:0}, {t:'spike', x:250}, {t:'platform', x:0, y:260, w:100}, {t:'platform', x:220, y:200, w:100}],
-            [{t:'spike', x:0}, {t:'spike', x:300}] 
+            [{t:'jpad', x:0}, {t:'platform', x:200, y:180, w:120}, {t:'spike', x:250, onPlatY:180}], // Jump pad to platform with spike
+            [{t:'platform', x:0, y:260, w:80}, {t:'platform', x:160, y:200, w:80}, {t:'platform', x:320, y:140, w:80}], // Fast stairs
+            [{t:'dspike', x:0}, {t:'gap', x:250, w倒100}], 
+            [{t:'platform', x:0, y:220, w:280}, {t:'spike', x:120, onPlatY:220}], // Long platform with spike in middle
+            [{t:'spike', x:0}, {t:'spike', x:240}] // Fast double jump
         ];
         
         while(curX < this.levelLength - 1500) {
@@ -355,7 +354,8 @@ class GeoDashEngine {
                 let finalY = p.onPlatY ? p.onPlatY : (p.y ? p.y : this.GROUND_Y);
                 this.geometryPatterns.push({t: p.t, x: curX + p.x, y: finalY, w: p.w||0, h: h, onPlatY: p.onPlatY});
             }
-            curX += 550 + ((r - Math.floor(r)) * 100); // Tighter spacing for more action
+            // 🔥 MUCH CLOSER SPACING for constant action 🔥
+            curX += 450 + ((r - Math.floor(r)) * 120); 
         }
     }
 
@@ -376,10 +376,10 @@ class GeoDashEngine {
                 p.x = this.player.x + 18; 
                 p.y = this.player.y + 36; 
                 p.vx = (Math.random() - 0.5) * 10; 
-                p.vy = -(Math.random() * 5);
+                p.vy = -(Math.random() * 3 + 1);
                 p.life = 1.0; 
                 p.s = 4 + Math.random() * 4; 
-                p.c = '#ffffff'; 
+                p.c = '#e0e0e0'; // Light dust
             }
         }
     }
@@ -482,11 +482,12 @@ class GeoDashEngine {
         this.frameCount += dt; 
         this.worldX += this.SPEED*dt;
 
-        // 🔥 THICKER & LONGER GHOST TRAIL 🔥
+        // 🔥 SMOOTH & LONG GHOST TRAIL 🔥
         if(Math.floor(this.frameCount) % 2 === 0) {
-            this.trail.push({x: this.player.x, y: this.player.y, rot: this.player.rot, life: 1.0});
+            // Start at 0.7 opacity for a nice bright trail tail
+            this.trail.push({x: this.player.x, y: this.player.y, rot: this.player.rot, life: 0.7});
         }
-        for(let t of this.trail) t.life -= 0.05 * dt; // Decreased fade speed so it's longer
+        for(let t of this.trail) t.life -= 0.04 * dt; // Fade out slowly
         this.trail = this.trail.filter(t => t.life > 0);
 
         if(Math.floor(this.frameCount)%30===0){
@@ -569,7 +570,7 @@ class GeoDashEngine {
         
         this.ctx.fillStyle = '#ffffff';
         for(let s of this.stars) {
-            this.ctx.globalAlpha = Math.random() * 0.5 + 0.3; 
+            this.ctx.globalAlpha = Math.random() * 0.5 + 0.2; 
             this.ctx.fillRect(s.x, s.y, s.s, s.s);
         }
         this.ctx.globalAlpha = 1.0;
@@ -625,13 +626,13 @@ class GeoDashEngine {
             }
         }
 
-        // Draw Ghost Trail
+        // 🔥 DRAW GHOST TRAIL (Smooth Cyan Fade) 🔥
         if(this.state !== 'DEAD') {
             for(let t of this.trail) {
                 this.ctx.save();
                 this.ctx.translate(t.x+18, t.y+18);
                 this.ctx.rotate(t.rot * Math.PI / 180);
-                this.ctx.fillStyle = `rgba(0, 240, 255, ${t.life * 0.5})`; 
+                this.ctx.fillStyle = `rgba(0, 240, 255, ${t.life})`; 
                 this.ctx.fillRect(-18, -18, 36, 36);
                 this.ctx.restore();
             }
@@ -646,19 +647,15 @@ class GeoDashEngine {
         }
         this.ctx.globalAlpha=1.0;
 
-        // 🔥 SUPER NEON GLOW CUBE 🔥
+        // 🔥 NORMAL CUBE (No extreme glow) 🔥
         if(this.state!=='DEAD'){
             this.ctx.save();
             this.ctx.translate(this.player.x+18, this.player.y+18);
             this.ctx.rotate(this.player.rot*Math.PI/180);
             
-            this.ctx.shadowBlur = 20; // GLOW ADDED!
-            this.ctx.shadowColor = '#00f0ff';
-            
             this.ctx.fillStyle=(this.state==='CLEAR')?'#00ff88':'#00f0ff'; 
             this.ctx.fillRect(-18,-18,36,36); 
             
-            this.ctx.shadowBlur = 0; // Turn off glow for inner square
             this.ctx.fillStyle='#05080f'; 
             this.ctx.fillRect(-14,-14,28,28); 
             
@@ -1045,8 +1042,8 @@ function updateSpinUI() {
     }
     
     btn.disabled = true; 
-    btn.style.background = '#555'; 
-    btn.style.color = '#222'; 
+    btn.style.background = '#333'; 
+    btn.style.color = '#666'; 
     let tl = spinStatus.timeLeft;
     
     timerInt = setInterval(() => {
@@ -1103,9 +1100,9 @@ async function fetchGlobalLeaderboard(){
             let lvl = lvls[i].toNumber(); 
             let medal = i===0 ? '🥇' : i===1 ? '🥈' : i===2 ? '🥉' : `<span style="display:inline-block;width:20px;text-align:center;color:#888;">${i+1}.</span>`;
             
-            html += `<div class="lb-row" style="margin-bottom:4px; background:rgba(0,240,255,0.02); padding:6px 10px; border-radius:4px; border-left: 2px solid ${i<3?'var(--gold)':'#222'};">
+            html += `<div class="lb-row">
                 <span style="display:flex;align-items:center;gap:8px"><span>${medal}</span><span style="color:var(--cyan);font-weight:bold">${name}</span></span>
-                <span><span style="color:white;font-weight:bold">${score.toLocaleString()}</span><span style="color:#555;font-size:11px"> pts · Lv${lvl}</span></span>
+                <span><span style="color:white;font-weight:bold">${score.toLocaleString()}</span><span style="color:#888;font-size:11px"> pts · Lv${lvl}</span></span>
             </div>`;
         }
         document.getElementById('globalLbContent').innerHTML = hasScores ? html : '<div style="text-align:center;color:#888;font-size:12px;">No scores yet. Be the first!</div>';
@@ -1153,9 +1150,9 @@ async function fetchPersonalStats(){
             } 
         }catch(e){}
         
-        document.getElementById('lbContent').innerHTML=`<div class="lb-row" style="background:rgba(0,240,255,0.05); padding:10px; border-radius:6px; border: 1px solid rgba(0,240,255,0.3);">
+        document.getElementById('lbContent').innerHTML=`<div class="lb-row" style="background:rgba(0,240,255,0.05); border: 1px solid rgba(0,240,255,0.3);">
             <span style="display:flex;align-items:center;gap:8px"><span>🏆</span><span style="color:var(--cyan);font-weight:bold">${name}</span></span>
-            <span><span style="color:white;font-weight:bold">${score.toLocaleString()}</span><span style="color:#555;font-size:11px"> pts · Max Lv${lvl}</span></span>
+            <span><span style="color:white;font-weight:bold">${score.toLocaleString()}</span><span style="color:#888;font-size:11px"> pts · Max Lv${lvl}</span></span>
         </div>`;
     }catch(e){}
 }
