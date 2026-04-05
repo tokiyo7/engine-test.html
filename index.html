@@ -934,8 +934,24 @@
             90% { opacity: 0.7; }
             100% { top: 110%; opacity: 0; }
         }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake-active {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
     </style>
-    
+
     <script type="module">
         import sdk from 'https://esm.sh/@farcaster/frame-sdk';
         window.fcSdk = sdk; 
@@ -1114,6 +1130,21 @@ function toggleDevilMode(isDevil) {
         geoBtn.classList.remove('active');
         devBtn.classList.add('active');
         gameBox.classList.add('devil-active-border');
+        
+        const flash = document.createElement('div');
+        flash.style.position = 'fixed';
+        flash.style.top = '0';
+        flash.style.left = '0';
+        flash.style.width = '100vw';
+        flash.style.height = '100vh';
+        flash.style.backgroundColor = '#ff3060';
+        flash.style.zIndex = '999999';
+        flash.style.pointerEvents = 'none';
+        flash.style.opacity = '0.8';
+        flash.style.transition = 'opacity 0.2s ease-out';
+        document.body.appendChild(flash);
+        setTimeout(() => { flash.style.opacity = '0'; setTimeout(() => flash.remove(), 200); }, 50);
+
         devilOverlay.style.display = 'flex';
         practiceBtn.disabled = true;
         officialBtn.disabled = true;
@@ -1468,7 +1499,7 @@ class GeoDashEngine {
     }
 
     spawnDeathExplosion(isHunter = false) {
-        for(let i=0; i<40; i++) {
+        for(let i=0; i<80; i++) {
             let p = this.particlePool.find(obj => !obj.active);
             if(p) {
                 p.active = true; 
@@ -1599,6 +1630,12 @@ class GeoDashEngine {
         this.state = 'DEAD'; 
         this.attempts++;
         this.dieReason = reason;
+
+        const gBox = document.getElementById('gameBox');
+        if(gBox) {
+            gBox.classList.add('shake-active');
+            setTimeout(() => gBox.classList.remove('shake-active'), 300);
+        }
         
         document.getElementById('attemptUI').innerText=`Attempt: ${this.attempts}`;
         
@@ -2592,7 +2629,7 @@ async function executeSpin(){
             document.getElementById('spinResult').innerText = errStr; 
             document.getElementById('spinResult').style.color = "#ff3060";
         }
-    }, 100); 
+    }, 1500); 
 }
 
 function buildLevelUI(){
