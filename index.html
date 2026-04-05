@@ -267,6 +267,98 @@
             transform: scale(0.95); 
         }
 
+        /* ═══════════════════════════════════════════════════
+           FIX 2: REWARD HUB MODAL
+           ═══════════════════════════════════════════════════ */
+        #rewardModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5,8,15,0.85);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .reward-modal-content {
+            background: linear-gradient(180deg, #0a0f18, #05080f);
+            border: 1px solid var(--gold);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 90%;
+            width: 420px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(255,215,0,0.15);
+        }
+
+        .reward-modal-title {
+            color: #ffd700;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+            letter-spacing: 2px;
+        }
+
+        .reward-modal-body {
+            font-size: 15px;
+            color: #d0d0d0;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .reward-claim-btn {
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 16px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            animation: btnPulse 1.5s infinite alternate;
+            transition: transform 0.2s;
+            display: none;
+        }
+
+        .reward-claim-btn:active {
+            transform: scale(0.95);
+        }
+
+        .reward-claim-btn:disabled {
+            background: #333 !important;
+            color: #666 !important;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        .reward-close-btn {
+            background: rgba(255,255,255,0.05);
+            color: #888;
+            border: 1px solid #444;
+            padding: 12px;
+            width: 100%;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: all 0.2s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .reward-close-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+
         .game-container { 
             position: relative; 
             width: 100%; 
@@ -463,9 +555,17 @@
             transition: all 0.2s; 
         }
         
-        .play-btn:hover { 
+        .play-btn:hover:not(:disabled) { 
             background: #00f0ff; 
             color: #000; 
+        }
+
+        .play-btn:disabled {
+            border-color: #444 !important;
+            color: #666 !important;
+            background: transparent !important;
+            cursor: not-allowed !important;
+            animation: none !important;
         }
         
         .play-btn-gold { 
@@ -495,6 +595,18 @@
             width: 100%; 
             margin-bottom: 25px; 
             line-height: 1.4; 
+        }
+
+        /* FIX 4: Arbiscan note styling */
+        .arbiscan-note {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+            font-style: italic;
         }
 
         .prize-chart { 
@@ -738,14 +850,14 @@
             max-width: 90vw;
         }
 
-        /* ═══════ DEVIL OVERLAY (hidden by default — devil mode is now playable) ═══════ */
+        /* ═══════ FIX 3: DEVIL OVERLAY — LOCKED with Blood Drip Visuals ═══════ */
         #devilOverlay { 
             position: absolute; 
             top: 0; 
             left: 0; 
             width: 100%; 
             height: 100%; 
-            background: rgba(20, 0, 0, 0.95); 
+            background: linear-gradient(180deg, rgba(20, 0, 0, 0.95), rgba(10, 0, 0, 0.98), rgba(0, 0, 0, 0.99)); 
             display: none; 
             flex-direction: column; 
             align-items: center; 
@@ -754,6 +866,7 @@
             backdrop-filter: blur(6px);
             text-align: center;
             padding: 20px;
+            overflow: hidden;
         }
         
         #devilOverlay .devil-chains { 
@@ -782,6 +895,37 @@
             letter-spacing: 1px;
             font-style: italic;
         }
+
+        /* ═══════ FIX 3: Blood Drip CSS Animation ═══════ */
+        .blood-drip {
+            position: absolute;
+            top: -80px;
+            width: 4px;
+            background: linear-gradient(180deg, #ff3060, #8b0000, transparent);
+            border-radius: 0 0 50% 50%;
+            opacity: 0.7;
+            animation: bloodFall linear infinite;
+        }
+
+        .blood-drip::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            background: #ff3060;
+            border-radius: 50%;
+            box-shadow: 0 0 6px #ff3060, 0 0 12px rgba(255,48,96,0.5);
+        }
+
+        @keyframes bloodFall {
+            0% { top: -80px; opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { top: 110%; opacity: 0; }
+        }
     </style>
     
     <script type="module">
@@ -805,18 +949,18 @@
 </head>
 <body>
 
-<!-- Devil Mode boom sound (plays once on toggle) -->
-<audio id="devilBoomAudio" src="https://www.myinstants.com/media/sounds/vine-boom.mp3" preload="auto"></audio>
+<!-- FIX 3: Audio tag REMOVED entirely — no sound effects from external sources -->
 
 <!-- ═══════════════════════════════════════════════════
      TASK 1: MASSIVE TOP NAVIGATION
+     FIX 2: Reward Hub button now opens modal
      ═══════════════════════════════════════════════════ -->
 <div class="top-nav">
     <div class="nav-modes">
         <button class="btn-geo-classic active" id="btnGeoMode" onclick="toggleDevilMode(false)">🟦 GeoDash Classic</button>
         <button class="btn-devil-mode" id="btnDevilMode" onclick="toggleDevilMode(true)">👿 DEVIL MODE</button>
     </div>
-    <button class="btn-reward-hub" id="btnRewardHub" onclick="claimReward()">🎁 REWARD HUB</button>
+    <button class="btn-reward-hub" id="btnRewardHub" onclick="openRewardModal()">🎁 REWARD HUB</button>
 </div>
 
 <div id="welcomeModal">
@@ -826,6 +970,20 @@
         <div class="modal-text">🎁 **PRACTICE UNLOCKED:** Level 1 is free to Practice. Pass a practice level OR spin the slot machine to unlock higher levels!</div>
         <div class="modal-text">💻 **PRO TIP:** Playing on a **Laptop or PC** will unlock the absolute best buttery-smooth experience.</div>
         <button class="modal-btn-spin" onclick="scrollToSpin()">🎰 TAKE ME TO FREE SPIN!</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     FIX 2: REWARD HUB MODAL
+     ═══════════════════════════════════════════════════ -->
+<div id="rewardModal">
+    <div class="reward-modal-content">
+        <div class="reward-modal-title">🎁 REWARD HUB</div>
+        <div class="reward-modal-body" id="rewardModalBody">
+            ⏳ Loading your reward status...
+        </div>
+        <button class="reward-claim-btn" id="rewardClaimBtn" onclick="executeClaimReward()">🎉 CLAIM NOW</button>
+        <button class="reward-close-btn" id="rewardCloseBtn" onclick="closeRewardModal()">Close</button>
     </div>
 </div>
 
@@ -846,8 +1004,22 @@
 <div class="game-container" id="gameBox">
     <canvas id="gameCanvas" width="800" height="400"></canvas>
     <div id="devilOverlay">
+        <!-- FIX 3: Blood drip elements -->
+        <div class="blood-drip" style="left: 5%; height: 60px; animation-duration: 3.2s; animation-delay: 0s;"></div>
+        <div class="blood-drip" style="left: 12%; height: 45px; animation-duration: 2.8s; animation-delay: 0.5s;"></div>
+        <div class="blood-drip" style="left: 22%; height: 70px; animation-duration: 3.5s; animation-delay: 1.2s;"></div>
+        <div class="blood-drip" style="left: 35%; height: 50px; animation-duration: 2.6s; animation-delay: 0.3s;"></div>
+        <div class="blood-drip" style="left: 48%; height: 55px; animation-duration: 3.0s; animation-delay: 1.8s;"></div>
+        <div class="blood-drip" style="left: 58%; height: 40px; animation-duration: 2.4s; animation-delay: 0.7s;"></div>
+        <div class="blood-drip" style="left: 68%; height: 65px; animation-duration: 3.3s; animation-delay: 1.5s;"></div>
+        <div class="blood-drip" style="left: 75%; height: 48px; animation-duration: 2.9s; animation-delay: 0.1s;"></div>
+        <div class="blood-drip" style="left: 82%; height: 58px; animation-duration: 3.1s; animation-delay: 2.0s;"></div>
+        <div class="blood-drip" style="left: 90%; height: 42px; animation-duration: 2.5s; animation-delay: 1.0s;"></div>
+        <div class="blood-drip" style="left: 95%; height: 52px; animation-duration: 3.4s; animation-delay: 0.8s;"></div>
+        <div class="blood-drip" style="left: 42%; height: 62px; animation-duration: 2.7s; animation-delay: 1.4s;"></div>
+
         <div class="devil-chains">⛓️🔒⛓️</div>
-        <h1>COMING VERY SOON</h1>
+        <h1>COMING SOON</h1>
         <p>The demons are forging new traps...</p>
         <div class="devil-chains" style="margin-top:10px;">🔥👿🔥</div>
     </div>
@@ -873,6 +1045,10 @@
 </div>
 <div class="btn-note">
     *Official Run requires a transaction to prevent hacking. Practice is free.
+</div>
+<!-- FIX 4: Arbiscan Method ID Confidence Note -->
+<div class="arbiscan-note">
+    (Note: Your on-chain transaction may show action "0x10b5ee50" — this is the secure Level Start function!)
 </div>
 
 <div class="prize-chart">
@@ -923,45 +1099,49 @@
 <div id="walletStatus">Ready to Play!</div>
 
 <!-- ═══════════════════════════════════════════════════
-     AUDIO ENGINE, DEVIL MODE TOGGLE, SOUND EFFECTS
+     AUDIO ENGINE, DEVIL MODE TOGGLE (FIX 3: No external audio, locked gameplay)
      ═══════════════════════════════════════════════════ -->
 <script>
 let ac = null;
 window.isDevilModeOn = false;
 let lastClearedLevel = 0;
 
-/* ═══════ TASK 2: DEVIL MODE TOGGLE — NOW PLAYABLE ═══════ */
+/* ═══════ FIX 3: DEVIL MODE TOGGLE — LOCKED, NO GAMEPLAY ═══════ */
 function toggleDevilMode(isDevil) {
     window.isDevilModeOn = isDevil;
     const geoBtn = document.getElementById('btnGeoMode');
     const devBtn = document.getElementById('btnDevilMode');
     const devilOverlay = document.getElementById('devilOverlay');
     const gameBox = document.getElementById('gameBox');
-    const boomAudio = document.getElementById('devilBoomAudio');
+    const practiceBtn = document.getElementById('practiceBtn');
+    const officialBtn = document.getElementById('officialRunBtn');
     
     if (isDevil) {
         geoBtn.classList.remove('active');
         devBtn.classList.add('active');
         gameBox.classList.add('devil-active-border');
         
-        /* Devil Mode is NOW PLAYABLE — hide the "coming soon" overlay */
-        devilOverlay.style.display = 'none';
+        /* FIX 3: Devil Mode is LOCKED — show "coming soon" overlay */
+        devilOverlay.style.display = 'flex';
         
-        /* Update canvas theme to blood red and redraw immediately */
+        /* FIX 3: Disable both play buttons */
+        practiceBtn.disabled = true;
+        officialBtn.disabled = true;
+        
+        /* Update canvas theme to blood red */
         if (typeof ge !== 'undefined') {
             ge.themeColor = '#ff3060';
             ge.draw();
         }
-        
-        /* Play boom sound ONCE on activation */
-        boomAudio.currentTime = 0;
-        boomAudio.volume = 0.6;
-        boomAudio.play().catch(e => console.log("Audio blocked, waiting for interaction"));
     } else {
         devBtn.classList.remove('active');
         geoBtn.classList.add('active');
         gameBox.classList.remove('devil-active-border');
         devilOverlay.style.display = 'none';
+        
+        /* FIX 3: Re-enable both play buttons */
+        practiceBtn.disabled = false;
+        officialBtn.disabled = false;
         
         /* Restore theme color based on official mode */
         if (typeof ge !== 'undefined') {
@@ -2066,7 +2246,7 @@ function handleOfficialDie(){
     ob.style.display='block';
 }
 
-/* ═══════ TASK 3: triggerWinUi — calls saveLevelClear (NO attempts arg) ═══════ */
+/* ═══════ triggerWinUi — calls saveLevelClear (NO attempts arg) ═══════ */
 function triggerWinUi(tries) {
     lastClearedLevel = ge.currentLevel;
     document.getElementById('overlayTitle').innerText=`✨ LEVEL ${ge.currentLevel} CLEAR! ✨`;
@@ -2096,7 +2276,6 @@ function triggerWinUi(tries) {
         if(isConnected){
             (async () => {
                 try {
-                    /* TASK 3: saveLevelClear — NO attempts argument. Contract counts securely. */
                     const iface = new ethers.utils.Interface(ABI);
                     const data = iface.encodeFunctionData("saveLevelClear", [ge.currentLevel, window.isDevilModeOn]);
                     
@@ -2297,7 +2476,7 @@ window.addEventListener('load', () => {
     },500);
 });
 
-/* ═══════ TASK 3: SECURE startOfficialRun — calls startLevel() FIRST ═══════ */
+/* ═══════ SECURE startOfficialRun — calls startLevel() FIRST ═══════ */
 async function startOfficialRun(){
     const btn = document.getElementById('officialRunBtn');
     
@@ -2371,26 +2550,14 @@ async function startOfficialRun(){
     }
 }
 
-/* ═══════ TASK 4: SPIN with Vault Check + Blockchain Timer ═══════ */
+/* ═══════ FIX 1: SPIN — Vault balance check REMOVED for instant response ═══════ */
 async function executeSpin(){
     const btn = document.getElementById('spinBtn'); 
     document.getElementById('spinCastBtn').style.display = 'none'; 
     if(!isConnected) { if(!await connectWallet(true)) return; }
     if (!spinStatus.hasFree) { showToast("No spin available! Wait for cooldown.", "red"); return; }
     
-    /* TASK 4: Vault Check — ensure contract has >= 0.05 ETH (ARB) */
-    try {
-        const vaultBalance = await publicProvider.getBalance(CONTRACT_ADDRESS);
-        const minBalance = ethers.utils.parseEther("0.05");
-        if(vaultBalance.lt(minBalance)) {
-            showToast("⚠️ Vault is empty! Admin needs to refill ARB.", "#ff3060");
-            return;
-        }
-    } catch(e) {
-        console.error("Vault check error:", e);
-        showToast("⚠️ Could not check vault balance. Try again.", "#ff3060");
-        return;
-    }
+    /* FIX 1: Vault balance check REMOVED — let the smart contract handle payout logic natively */
     
     try { 
         await Promise.race([
@@ -2515,7 +2682,7 @@ function buildLevelUI(){
     }
 }
 
-/* ═══════ TASK 5: LEADERBOARD TOGGLE ═══════ */
+/* ═══════ LEADERBOARD TOGGLE ═══════ */
 function switchLeaderboard(mode) {
     document.getElementById('lbBtnGeo').classList.remove('active');
     document.getElementById('lbBtnDevil').classList.remove('active');
@@ -2565,7 +2732,7 @@ function updateSpinUI() {
     }, 1000);
 }
 
-/* ═══════ TASK 4: BLOCKCHAIN TIMESTAMP FOR SPIN COOLDOWN ═══════ */
+/* ═══════ BLOCKCHAIN TIMESTAMP FOR SPIN COOLDOWN ═══════ */
 async function refreshSpinStatus(){
     if(!userAddress) return;
     try{ 
@@ -2590,19 +2757,61 @@ async function refreshSpinStatus(){
     }
 }
 
-/* ═══════ REWARD HUB: claimReward with whitelistRewards check ═══════ */
-async function claimReward() {
-    if (!isConnected) {
-        if (!await connectWallet(true)) return;
-    }
-    try {
-        showToast("Checking your rewards...", "#ffd700");
-        const rewardAmount = await readContract.whitelistRewards(userAddress);
-        if (rewardAmount.eq(0)) {
-            showToast("❌ You don't have any pending rewards in the Hub. (Ask Admin!)", "#ff3060");
-            return;
+/* ═══════ FIX 2: REWARD HUB MODAL FUNCTIONS ═══════ */
+function openRewardModal() {
+    const modal = document.getElementById('rewardModal');
+    const body = document.getElementById('rewardModalBody');
+    const claimBtn = document.getElementById('rewardClaimBtn');
+    
+    /* Reset modal state */
+    body.innerHTML = '⏳ Loading your reward status...';
+    claimBtn.style.display = 'none';
+    claimBtn.disabled = false;
+    claimBtn.innerText = '🎉 CLAIM NOW';
+    
+    /* Show modal */
+    modal.style.display = 'flex';
+    
+    /* Fetch reward data */
+    (async () => {
+        if (!isConnected) {
+            if (!await connectWallet(true)) {
+                body.innerHTML = '❌ Please connect your wallet first.';
+                return;
+            }
         }
         
+        try {
+            const rewardAmount = await readContract.whitelistRewards(userAddress);
+            
+            if (rewardAmount.gt(0)) {
+                const arbAmount = ethers.utils.formatEther(rewardAmount);
+                body.innerHTML = `🎉 <span style="color:#ffd700;font-weight:bold;font-size:18px;">Congratulations!</span><br><br>You are eligible for <span style="color:#00ff88;font-weight:bold;font-size:22px;">${arbAmount} ARB</span><br><br><span style="color:#aaa;font-size:12px;">Click CLAIM NOW to receive your reward!</span>`;
+                claimBtn.style.display = 'block';
+            } else {
+                body.innerHTML = `❌ <span style="color:#ff3060;font-weight:bold;">Not Eligible</span><br><br><span style="color:#aaa;">Keep playing and tag Admin to get whitelisted!</span><br><br><span style="color:#555;font-size:11px;">DM @tokiyo on Farcaster for reward eligibility</span>`;
+                claimBtn.style.display = 'none';
+            }
+        } catch (err) {
+            console.error("Reward check error:", err);
+            body.innerHTML = '❌ Failed to check rewards. Please try again.';
+            claimBtn.style.display = 'none';
+        }
+    })();
+}
+
+function closeRewardModal() {
+    document.getElementById('rewardModal').style.display = 'none';
+}
+
+async function executeClaimReward() {
+    const body = document.getElementById('rewardModalBody');
+    const claimBtn = document.getElementById('rewardClaimBtn');
+    
+    claimBtn.disabled = true;
+    claimBtn.innerText = '⏳ CONFIRMING TX...';
+    
+    try {
         try { 
             await Promise.race([
                 walletProvider.request({method: 'wallet_switchEthereumChain', params: [{chainId: '0xa4b1'}]}),
@@ -2613,14 +2822,15 @@ async function claimReward() {
         const iface = new ethers.utils.Interface(ABI);
         const data = iface.encodeFunctionData("claimReward", []);
         
-        showToast("🎁 Confirm claim in your wallet...", "#ffd700");
+        body.innerHTML = '📝 Confirm the transaction in your wallet...';
         
         const txHash = await walletProvider.request({
             method: 'eth_sendTransaction',
             params: [{ to: CONTRACT_ADDRESS, from: userAddress, data: data, chainId: '0xa4b1' }]
         });
         
-        showToast("⏳ Claim Tx Sent! Mining on Arbitrum...", "#ffd700");
+        body.innerHTML = '⛏️ Mining on Arbitrum (5-10s)...';
+        claimBtn.innerText = '⛏️ MINING...';
         
         let isConfirmed = false;
         for(let i=0; i<15; i++) { 
@@ -2630,22 +2840,30 @@ async function claimReward() {
                 if(receipt && receipt.confirmations > 0) { isConfirmed = true; break; } 
             } catch(err){} 
         }
+        
         if (isConfirmed) {
-            showToast("🎉 Reward Successfully Claimed! Check your wallet.", "#00ff88");
+            body.innerHTML = '🎉 <span style="color:#00ff88;font-weight:bold;font-size:18px;">Reward Successfully Claimed!</span><br><br><span style="color:#aaa;">Check your wallet for the ARB.</span>';
+            claimBtn.style.display = 'none';
+            showToast("🎉 Reward Successfully Claimed!", "#00ff88");
         } else {
-            showToast("Claim Transaction Delayed. Check Arbiscan.", "#ff3060");
+            body.innerHTML = '⚠️ <span style="color:#ffd700;">Transaction sent but not yet confirmed.</span><br><br><span style="color:#aaa;">Check Arbiscan for status.</span>';
+            claimBtn.style.display = 'none';
         }
     } catch (err) {
         console.error("claimReward error:", err);
+        
         if (err.code === 4001 || (err.message && err.message.includes("rejected"))) {
-            showToast("Claim Cancelled by user.", "red");
+            body.innerHTML = '❌ Transaction rejected by user.';
         } else {
-            showToast("Claim Failed: " + (err.reason || err.message || "Unknown error"), "red");
+            body.innerHTML = '❌ Claim Failed: ' + (err.reason || err.message || "Unknown error");
         }
+        
+        claimBtn.disabled = false;
+        claimBtn.innerText = '🎉 CLAIM NOW';
     }
 }
 
-/* ═══════ TASK 5: DUAL LEADERBOARDS — GEO vs DEVIL (Attempts-Based) ═══════ */
+/* ═══════ DUAL LEADERBOARDS — GEO vs DEVIL (Attempts-Based) ═══════ */
 const fcUsernameCache={};
 
 async function fetchGlobalLeaderboard(){
