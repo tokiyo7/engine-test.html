@@ -599,7 +599,6 @@
             line-height: 1.4; 
         }
 
-        /* FIX 5: Arbiscan note styling */
         .arbiscan-note {
             font-size: 10px;
             color: #555;
@@ -861,7 +860,6 @@
             max-width: 90vw;
         }
 
-        /* ═══════ FIX 3: DEVIL OVERLAY — LOCKED with Blood Drip Visuals ═══════ */
         #devilOverlay { 
             position: absolute; 
             top: 0; 
@@ -907,7 +905,6 @@
             font-style: italic;
         }
 
-        /* ═══════ FIX 3: Blood Drip CSS Animation ═══════ */
         .blood-drip {
             position: absolute;
             top: -80px;
@@ -960,9 +957,6 @@
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════
-     TASK 2: TOP NAVIGATION BAR (FIX 2: Reward Hub opens modal)
-     ═══════════════════════════════════════════════════ -->
 <div class="top-nav">
     <div class="nav-modes">
         <button class="btn-geo-classic active" id="btnGeoMode" onclick="toggleDevilMode(false)">🟦 GeoDash Classic</button>
@@ -981,9 +975,6 @@
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════
-     FIX 4: REWARD HUB MODAL
-     ═══════════════════════════════════════════════════ -->
 <div id="rewardModal">
     <div class="reward-modal-content">
         <div class="reward-modal-title">🎁 REWARD HUB</div>
@@ -1012,7 +1003,6 @@
 <div class="game-container" id="gameBox">
     <canvas id="gameCanvas" width="800" height="400"></canvas>
     <div id="devilOverlay">
-        <!-- FIX 3: Blood drip elements -->
         <div class="blood-drip" style="left: 5%; height: 60px; animation-duration: 3.2s; animation-delay: 0s;"></div>
         <div class="blood-drip" style="left: 12%; height: 45px; animation-duration: 2.8s; animation-delay: 0.5s;"></div>
         <div class="blood-drip" style="left: 22%; height: 70px; animation-duration: 3.5s; animation-delay: 1.2s;"></div>
@@ -1054,7 +1044,6 @@
 <div class="btn-note">
     *Official Run requires a transaction to prevent hacking. Practice is free.
 </div>
-<!-- FIX 5: Arbiscan Method ID Confidence Note -->
 <div class="arbiscan-note">
     (Note: Your on-chain transaction may show action "0x10b5ee50" — this is the secure Level Start function!)
 </div>
@@ -1089,7 +1078,7 @@
     <button class="spin-btn" id="spinBtn">🎰 SPIN NOW!</button>
     <button class="cast-btn-small" id="spinCastBtn">📢 SHARE YOUR SPIN WIN!</button>
     <div class="slot-info" id="spinInfo">Loading status...</div>
-    <div class="spin-info-note">(Note: Farcaster may show "No state changes", but your random ARB prize will be credited!)</div>
+    <div class="spin-info-note">(Note: Farcaster may show "No state changes", but your random ARB prize will be credited successfully!)</div>
     <div class="slot-info" style="color:#00ff88; font-weight:bold; margin-top:8px;" id="spinResult"></div>
 </div>
 
@@ -1107,15 +1096,11 @@
 
 <div id="walletStatus">Ready to Play!</div>
 
-<!-- ═══════════════════════════════════════════════════
-     AUDIO ENGINE, DEVIL MODE TOGGLE (FIX 3: No external audio, locked gameplay)
-     ═══════════════════════════════════════════════════ -->
 <script>
 let ac = null;
 window.isDevilModeOn = false;
 let lastClearedLevel = 0;
 
-/* ═══════ FIX 3: DEVIL MODE TOGGLE — LOCKED, NO GAMEPLAY ═══════ */
 function toggleDevilMode(isDevil) {
     window.isDevilModeOn = isDevil;
     const geoBtn = document.getElementById('btnGeoMode');
@@ -1129,15 +1114,10 @@ function toggleDevilMode(isDevil) {
         geoBtn.classList.remove('active');
         devBtn.classList.add('active');
         gameBox.classList.add('devil-active-border');
-        
-        /* FIX 3: Devil Mode is LOCKED — show "coming soon" overlay */
         devilOverlay.style.display = 'flex';
-        
-        /* FIX 3: Disable both play buttons */
         practiceBtn.disabled = true;
         officialBtn.disabled = true;
         
-        /* Update canvas theme to blood red */
         if (typeof ge !== 'undefined') {
             ge.themeColor = '#ff3060';
             ge.draw();
@@ -1147,12 +1127,9 @@ function toggleDevilMode(isDevil) {
         geoBtn.classList.add('active');
         gameBox.classList.remove('devil-active-border');
         devilOverlay.style.display = 'none';
-        
-        /* FIX 3: Re-enable both play buttons */
         practiceBtn.disabled = false;
         officialBtn.disabled = false;
         
-        /* Restore theme color based on official mode */
         if (typeof ge !== 'undefined') {
             ge.themeColor = ge.official ? '#ffd700' : '#00f0ff';
             ge.draw();
@@ -1160,7 +1137,6 @@ function toggleDevilMode(isDevil) {
         }
     }
     
-    /* Sync leaderboard toggle to match mode */
     if(isDevil) {
         document.getElementById('lbBtnGeo').classList.remove('active');
         document.getElementById('lbBtnDevil').classList.add('active');
@@ -1171,7 +1147,6 @@ function toggleDevilMode(isDevil) {
         window._currentLBMode = 'geo';
     }
     
-    /* Refresh leaderboard for current mode */
     if (typeof isConnected !== 'undefined' && isConnected) {
         fetchGlobalLeaderboard();
         fetchPersonalStats();
@@ -1232,10 +1207,6 @@ function playWin() {
 }
 </script>
 
-<!-- ═══════════════════════════════════════════════════
-     GEODASH ENGINE — COMPLETE PHYSICS (100% UNTOUCHED)
-     Every single line preserved with original formatting
-     ═══════════════════════════════════════════════════ -->
 <script>
 class GeoDashEngine {
     constructor(canvasId) {
@@ -1568,7 +1539,6 @@ class GeoDashEngine {
         this.official = isOfficial;
         this.themeColor = isOfficial ? '#ffd700' : '#00f0ff';
         
-        /* If devil mode is on, override theme to blood red */
         if(window.isDevilModeOn) {
             this.themeColor = '#ff3060';
         }
@@ -1904,7 +1874,6 @@ class GeoDashEngine {
                     return; 
                 }
                 
-                // 🔥 JUMP PAD MANUAL + FALLING LOGIC 🔥
                 if(o.t==='jpad'){ 
                     let isFalling = (!this.player.ground && this.player.vy > 0);
                     let manualJump = (this.jumpBuffer > 0);
@@ -2232,9 +2201,6 @@ ge.draw();
 window.baseScore = 0; 
 </script>
 
-<!-- ═══════════════════════════════════════════════════
-     GAME LOGIC: WIN UI, OFFICIAL RUN, LEVEL UNLOCK
-     ═══════════════════════════════════════════════════ -->
 <script>
 let localSpins = parseInt(localStorage.getItem('geodash_spins') || '0');
 let practiceUnlocks = parseInt(localStorage.getItem('geodash_prac_unlocks') || '1');
@@ -2255,7 +2221,6 @@ function handleOfficialDie(){
     ob.style.display='block';
 }
 
-/* ═══════ triggerWinUi — calls saveLevelClear (NO attempts arg) ═══════ */
 function triggerWinUi(tries) {
     lastClearedLevel = ge.currentLevel;
     document.getElementById('overlayTitle').innerText=`✨ LEVEL ${ge.currentLevel} CLEAR! ✨`;
@@ -2344,17 +2309,14 @@ function triggerWinUi(tries) {
 }
 </script>
 
-<!-- ═══════════════════════════════════════════════════
-     WEB3: V5.0 CONTRACT, WALLET, SPIN, LEADERBOARD, REWARD
-     ═══════════════════════════════════════════════════ -->
 <script>
-const CONTRACT_ADDRESS = "0x3AC8485D70c2FE557A0eE53d17d414E6d00188Be";
+const CONTRACT_ADDRESS = "0xf9f19D828D961605410938be8b4AFe3d74bAd3db";
 
 const ABI = [
     "function spin() external",
     "function claimReward() external",
-    "function startLevel(uint256 _level, bool _isDevilGame) external",
-    "function saveLevelClear(uint256 _level, bool _isDevilGame) external",
+    "function startLevel(uint256 level) external",
+    "function saveLevelClear(uint256 level, bool isDevilGame) external",
     "function getGeoLeaderboard() external view returns (address[15] memory, uint256[15] memory, uint256[15] memory)",
     "function getDevilLeaderboard() external view returns (address[15] memory, uint256[15] memory, uint256[15] memory)",
     "function lastSpinTime(address) external view returns (uint256)",
@@ -2366,12 +2328,11 @@ let isConnected = false;
 let isFarcasterWallet = false; 
 let walletProvider = null; 
 let spinStatus = { hasFree: false, timeLeft: 0 };
-const GAME_URL = "https://farcaster.xyz/miniapps/vDZmdCj1pC8Z/geodash-by-tokiyo";
+const GAME_URL = "https://geodash-amber.vercel.app";
 
 const publicProvider = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc');
 const readContract = new ethers.Contract(CONTRACT_ADDRESS, ABI, publicProvider);
 
-/* Leaderboard mode tracker (independent from game mode) */
 window._currentLBMode = 'geo';
 
 function showToast(msg, color='var(--cyan)'){
@@ -2485,7 +2446,6 @@ window.addEventListener('load', () => {
     },500);
 });
 
-/* ═══════ TASK 1: SECURE startOfficialRun — calls startLevel() FIRST ═══════ */
 async function startOfficialRun(){
     const btn = document.getElementById('officialRunBtn');
     
@@ -2501,14 +2461,13 @@ async function startOfficialRun(){
     
     if(ge.official && ge.state === 'PLAYING'){ showToast("Run active!", "#ffd700"); return; }
 
-    /* Step 1: Send startLevel() transaction to blockchain BEFORE starting game */
     btn.disabled = true;
     btn.innerText = "⏳ CONFIRMING TX...";
     showToast("📝 Confirm startLevel() in your wallet...", "#ffd700");
 
     try {
         const iface = new ethers.utils.Interface(ABI);
-        const data = iface.encodeFunctionData("startLevel", [ge.currentLevel, window.isDevilModeOn]);
+        const data = iface.encodeFunctionData("startLevel", [ge.currentLevel]);
 
         try { 
             await Promise.race([
@@ -2522,10 +2481,13 @@ async function startOfficialRun(){
             params: [{ to: CONTRACT_ADDRESS, from: userAddress, data: data, chainId: '0xa4b1' }] 
         });
 
-        showToast("⛏️ Tx Mining... Game will start automatically!", "#ffd700");
-        btn.innerText = "⛏️ MINING TX...";
+        ge.attempts = 0;
+        document.getElementById('attemptUI').innerText=`Attempt: 0`;
+        btn.innerText = "💎 OFFICIAL RUN ACTIVE";
+        ge.start(true);
 
-        /* Step 2: Wait for blockchain confirmation */
+        showToast("⛏️ Tx Mining in background...", "#ffd700");
+
         let confirmed = false;
         for(let i=0; i<20; i++){
             await new Promise(r=>setTimeout(r,1500));
@@ -2536,16 +2498,9 @@ async function startOfficialRun(){
         }
 
         if(confirmed) {
-            /* Step 3: TX confirmed — NOW start the game */
-            showToast("✅ Level registered on-chain! GO GO GO!", "#00ff88");
-            ge.attempts = 0;
-            document.getElementById('attemptUI').innerText=`Attempt: 0`;
-            btn.innerText = "💎 OFFICIAL RUN ACTIVE";
-            ge.start(true);
+            showToast("✅ Level registered on-chain!", "#00ff88");
         } else {
-            showToast("❌ Transaction timed out. Try again.", "#ff3060");
-            btn.disabled = false;
-            btn.innerText = "💎 OFFICIAL ON-CHAIN RUN";
+            showToast("⚠️ Transaction still processing...", "#ffd700");
         }
     } catch(e) {
         console.error("startLevel error:", e);
@@ -2559,14 +2514,11 @@ async function startOfficialRun(){
     }
 }
 
-/* ═══════ FIX 5: SPIN — Vault balance check REMOVED for instant response ═══════ */
 async function executeSpin(){
     const btn = document.getElementById('spinBtn'); 
     document.getElementById('spinCastBtn').style.display = 'none'; 
     if(!isConnected) { if(!await connectWallet(true)) return; }
     if (!spinStatus.hasFree) { showToast("No spin available! Wait for cooldown.", "red"); return; }
-    
-    /* FIX 5: Vault balance check REMOVED — let the smart contract handle payout logic natively */
     
     try { 
         await Promise.race([
@@ -2643,7 +2595,6 @@ async function executeSpin(){
     }, 100); 
 }
 
-/* ═══════ COMPLETE buildLevelUI ═══════ */
 function buildLevelUI(){
     const grid = document.getElementById('levelGrid'); 
     grid.innerHTML='';
@@ -2691,7 +2642,6 @@ function buildLevelUI(){
     }
 }
 
-/* ═══════ LEADERBOARD TOGGLE ═══════ */
 function switchLeaderboard(mode) {
     document.getElementById('lbBtnGeo').classList.remove('active');
     document.getElementById('lbBtnDevil').classList.remove('active');
@@ -2702,7 +2652,6 @@ function switchLeaderboard(mode) {
         document.getElementById('lbBtnGeo').classList.add('active');
     }
     
-    /* Store which board is showing (independent from game mode) */
     window._currentLBMode = mode;
     fetchGlobalLeaderboard();
     fetchPersonalStats();
@@ -2741,14 +2690,12 @@ function updateSpinUI() {
     }, 1000);
 }
 
-/* ═══════ FIX 5: BLOCKCHAIN TIMESTAMP FOR SPIN COOLDOWN ═══════ */
 async function refreshSpinStatus(){
     if(!userAddress) return;
     try{ 
         const lsTime = await readContract.lastSpinTime(userAddress);
         const lastSpinUnix = lsTime.toNumber();
         
-        /* Use blockchain block timestamp instead of Date.now() */
         const currentBlock = await publicProvider.getBlock('latest');
         const nowUnix = currentBlock.timestamp;
         const timePassed = nowUnix - lastSpinUnix;
@@ -2766,22 +2713,18 @@ async function refreshSpinStatus(){
     }
 }
 
-/* ═══════ FIX 4: REWARD HUB MODAL FUNCTIONS ═══════ */
 function openRewardModal() {
     const modal = document.getElementById('rewardModal');
     const body = document.getElementById('rewardModalBody');
     const claimBtn = document.getElementById('rewardClaimBtn');
     
-    /* Reset modal state */
     body.innerHTML = '⏳ Loading your reward status...';
     claimBtn.style.display = 'none';
     claimBtn.disabled = false;
     claimBtn.innerText = '🎉 CLAIM NOW';
     
-    /* Show modal */
     modal.style.display = 'flex';
     
-    /* Fetch reward data */
     (async () => {
         if (!isConnected) {
             if (!await connectWallet(true)) {
@@ -2872,15 +2815,11 @@ async function executeClaimReward() {
     }
 }
 
-/* ═══════ DUAL LEADERBOARDS — GEO vs DEVIL (Attempts-Based) ═══════ */
-const fcUsernameCache={};
-
 async function fetchGlobalLeaderboard(){
     try{
         let addrs, lvls, attempts;
         let lbMode = window._currentLBMode || 'geo';
         
-        /* Use the correct leaderboard function based on toggle */
         if(lbMode === 'devil') {
             [addrs, lvls, attempts] = await readContract.getDevilLeaderboard();
         } else {
@@ -2956,7 +2895,6 @@ async function fetchPersonalStats(){
             }
         }
         
-        /* Only update level unlocks from Geo leaderboard (not devil) */
         if(lbMode !== 'devil' && bestLvl > 0) {
             window.completedLevels = new Set(); 
             window.unlockedLevels = new Set([1]);
