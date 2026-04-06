@@ -952,18 +952,23 @@
         window.fcSdk = sdk; 
         
         window.addEventListener('DOMContentLoaded', () => {
-            try {
-                sdk.actions.ready();
-                sdk.context.then(async context => {
-                    if (context && context.user) {
-                        window.fcUsername = context.user.username || null;
-                        const titleEl = document.getElementById('mainTitle');
-                        if(titleEl && window.fcUsername) {
-                            titleEl.innerHTML = `GEODASH <span style="font-size:12px;color:#888;letter-spacing:0;">@${window.fcUsername}</span>`;
-                        }
+            // Wait 300ms for Frame environment sync
+            setTimeout(() => {
+                try {
+                    if (window.fcSdk && window.fcSdk.actions) {
+                        window.fcSdk.actions.ready();
+                        window.fcSdk.context.then(async context => {
+                            if (context && context.user) {
+                                window.fcUsername = context.user.username || null;
+                                const titleEl = document.getElementById('mainTitle');
+                                if(titleEl && window.fcUsername) {
+                                    titleEl.innerHTML = `GEODASH <span style="font-size:12px;color:#888;letter-spacing:0;">@${window.fcUsername}</span>`;
+                                }
+                            }
+                        }).catch(()=>{});
                     }
-                }).catch(()=>{});
-            } catch(e) {}
+                } catch (e) { console.error("SDK Ready Error:", e); }
+            }, 300);
         });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -2352,14 +2357,17 @@ function triggerWinUi(tries) {
 const CONTRACT_ADDRESS = "0x0C2c9dd1001a8ee6e329d972D0Ba6546db92d6d7";
 
 const ABI = [
-    "function spin() external",
+    "function startLevel(uint256 level) external",
     "function saveLevelClear(uint256 level, bool isDevilGame) external",
+    "function spin() external",
     "function claimReward() external",
-    "function addToWhitelist(address) external",
-    "function setSpinRange(uint256, uint256) external",
-    "function resetLeaderboard() external",
-    "function depositArb() external payable",
-    "function adminWithdrawArb(uint256) external"
+    "function getGeoLeaderboard() external view returns (address[15] memory, uint256[15] memory, uint256[15] memory)",
+    "function getDevilLeaderboard() external view returns (address[15] memory, uint256[15] memory, uint256[15] memory)",
+    "function lastSpinTime(address) external view returns (uint256)",
+    "function whitelistRewards(address) external view returns (uint256)",
+    "function getArbBalance() external view returns (uint256)",
+    "function spinMinReward() view returns (uint256)",
+    "function spinMaxReward() view returns (uint256)"
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -2514,7 +2522,7 @@ async function startOfficialRun(){
 
     try {
         const iface = new ethers.utils.Interface(ABI);
-        const data = iface.encodeFunctionData("startLevel", [ge.currentLevel]);
+        const data = iface.encodeFunctionData("startLevel", [Number(ge.currentLevel)]);
 
         try { 
             await Promise.race([
