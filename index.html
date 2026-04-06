@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GeoDash — Play & Earn ARB</title>
-    <meta property="og:title" content="GeoDash — The Boss Fight Update">
+    <title>GeoDash 3.0 — Play & Earn ARB</title>
+    <meta property="og:title" content="GeoDash 3.0 — The Boss Fight Update">
     <meta property="og:description" content="Geometry Dash on Arbitrum! Survive the 3-Phase Robo-Hunter Boss Fight! Season 1 live now!">
     <meta property="og:image" content="https://geodash-amber.vercel.app/preview.png">
     <meta property="og:url" content="https://geodash-amber.vercel.app">
-    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://geodash-amber.vercel.app/preview.png","button":{"title":"🎮 Play GeoDash 2.0","action":{"type":"launch_frame","name":"GeoDash","url":"https://geodash-amber.vercel.app","splashImageUrl":"https://geodash-amber.vercel.app/icon.png","splashBackgroundColor":"#05080f"}}}' />
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://geodash-amber.vercel.app/preview.png","button":{"title":"🎮 Play GeoDash 3.0","action":{"type":"launch_frame","name":"GeoDash","url":"https://geodash-amber.vercel.app","splashImageUrl":"https://geodash-amber.vercel.app/icon.png","splashBackgroundColor":"#05080f"}}}' />
     <meta name="theme-color" content="#05080f">
     <link rel="icon" href="https://geodash-amber.vercel.app/icon.png">
 
@@ -985,10 +985,10 @@
 
 <div id="welcomeModal">
     <div class="modal-content">
-        <div class="modal-title">Welcome to GeoDash! ⚡</div>
-        <div class="modal-text">🚀 **THE BOSS FIGHT UPDATE:** Think you can just fly over everything? Survive 50 shots from the Robo-Hunter in Flappy Mode! 🎯</div>
-        <div class="modal-text">🎁 **PRACTICE UNLOCKED:** Level 1 is free to Practice. Pass a practice level OR spin the slot machine to unlock higher levels!</div>
-        <div class="modal-text">💻 **PRO TIP:** Playing on a **Laptop or PC** will unlock the absolute best buttery-smooth experience.</div>
+        <div class="modal-title">GeoDash 3.0: THE BOSS UPDATE ⚡</div>
+        <div class="modal-text">🚀 **VERSION 3.0 IS LIVE:** Experience the ultimate test of reflexes! Survive the 3-Phase Robo-Hunter Boss Fight and claim your place on the global leaderboard. 🎯</div>
+        <div class="modal-text">💎 **ON-CHAIN REWARDS:** Play Official Runs to earn $ARB rewards directly to your wallet. Every clear matters in the new Season!</div>
+        <div class="modal-text">💻 **OPTIMIZED EXPERIENCE:** Best played on Laptop/PC for maximum FPS and precision. Check the Rotate button for full-screen mode!</div>
         <button class="modal-btn-spin" onclick="scrollToSpin()">🎰 TAKE ME TO FREE SPIN!</button>
     </div>
 </div>
@@ -1045,6 +1045,10 @@
         <button class="btn-large btn-social" id="overlayCastBtn">📢 SHARE TO CLAIM ARB</button>
         <button class="btn-large" id="overlayBtn" style="margin-top:15px; font-size:14px; padding:10px 20px; background: #222; color: #fff;">Return to Menu</button>
     </div>
+</div>
+
+<div style="width:100%; max-width:800px; margin: 10px 0; display: flex; justify-content: center;">
+    <button id="rotateBtn" style="width:100%; padding: 16px; background: rgba(10,15,24,0.9); border: 2px solid var(--cyan); border-radius: 12px; color: var(--cyan); font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(0,240,255,0.25); letter-spacing: 1.5px; font-family: 'Courier New', monospace; transition: all 0.3s; font-size: 14px; text-transform: uppercase;">🔄 FULL SCREEN / ROTATE</button>
 </div>
 
 <div class="progress-bar-wrap">
@@ -2459,6 +2463,9 @@ function openCast(text){
 window.addEventListener('load', () => {
     document.getElementById('practiceBtn').addEventListener('click', () => { ge.start(false); });
     document.getElementById('officialRunBtn').addEventListener('click', startOfficialRun);
+    document.getElementById('rotateBtn').addEventListener('click', () => {
+        showToast("🚀 Coming Soon! Turn on notifications to experience DEVIL MODE with exciting bounty rewards! 🔥👿", "var(--cyan)");
+    });
     document.getElementById('overlayBtn').addEventListener('click', () => { 
         document.getElementById('overlay').style.display='none'; 
         ge.state='IDLE'; 
