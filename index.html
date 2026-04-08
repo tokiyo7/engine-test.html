@@ -2,29 +2,97 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>GeoDash God Mode</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️‍♂️ Tokiyo God Mode</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        body { background: #05080f; color: #00f0ff; font-family: monospace; padding: 50px; text-align: center; }
-        .box { background: #111; padding: 30px; border: 2px solid #00f0ff; border-radius: 10px; max-width: 400px; margin: auto; }
-        input { padding: 10px; margin: 10px 0; width: 80%; text-align: center; font-weight: bold; background: #000; color: #ffd700; border: 1px solid #ffd700; }
-        button { background: #ffd700; color: #000; padding: 15px 20px; font-weight: bold; cursor: pointer; border: none; margin: 10px; width: 80%; border-radius: 5px; }
-        .danger { background: #ff3060; color: white; }
+        :root {
+            --bg: #05080f;
+            --cyan: #00f0ff;
+            --gold: #ffd700;
+            --red: #ff3060;
+            --green: #00ff88;
+        }
+        body { 
+            background: var(--bg); 
+            color: #fff; 
+            font-family: 'Courier New', monospace; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .panel { 
+            background: linear-gradient(180deg, #0a0f18, #05080f); 
+            border: 2px solid var(--cyan); 
+            border-radius: 15px; 
+            padding: 30px; 
+            width: 100%; 
+            max-width: 400px; 
+            text-align: center; 
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); 
+        }
+        h2 { color: var(--gold); margin-top: 0; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .input-group { margin: 20px 0; text-align: left; }
+        label { color: #888; font-size: 12px; font-weight: bold; margin-bottom: 5px; display: block; }
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            background: #000; 
+            border: 1px solid #333; 
+            color: var(--cyan); 
+            border-radius: 8px; 
+            font-size: 16px; 
+            font-family: monospace; 
+            outline: none; 
+            box-sizing: border-box;
+        }
+        button { 
+            width: 100%; 
+            padding: 15px; 
+            font-size: 14px; 
+            font-weight: bold; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-family: monospace; 
+            transition: 0.2s; 
+        }
+        .btn-connect { background: #222; color: #fff; border: 1px solid #444; }
+        .btn-connect.active { background: rgba(0,255,136,0.1); color: var(--green); border-color: var(--green); }
+        .btn-farm { background: rgba(0,240,255,0.1); color: var(--cyan); border: 1px solid var(--cyan); }
+        .btn-clear { background: linear-gradient(90deg, #ff3060, #800); color: #fff; text-shadow: 0 0 5px #000; }
+        button:hover { transform: scale(1.02); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        #status { margin-top: 20px; font-size: 12px; color: #aaa; padding: 10px; background: #000; border-radius: 5px; border: 1px dashed #333; }
     </style>
 </head>
 <body>
 
-    <div class="box">
-        <h2>🕵️‍♂️ TOKIYO CHEAT PANEL</h2>
-        <p style="color:#888; font-size:12px;">Only for Admin use. Do not share.</p>
-
-        <label>Level Number to Fake:</label><br>
-        <input type="number" id="lvlNumber" value="4" min="1" max="10">
-
-        <button onclick="farmAttempt()">1. ADD FAKE ATTEMPT</button>
-        <button class="danger" onclick="instantClear()">2. INSTANT LEVEL CLEAR</button>
+    <div class="panel">
+        <h2>🕵️‍♂️ GOD MODE PANEL</h2>
         
-        <p id="status" style="margin-top:20px; color:#00ff88; font-size:14px;"></p>
+        <button id="connectBtn" class="btn-connect" onclick="connectWallet()">🔗 Connect MetaMask</button>
+
+        <div class="input-group">
+            <label>TARGET LEVEL (1-10):</label>
+            <input type="number" id="lvlInput" value="4" min="1" max="10">
+        </div>
+
+        <div class="input-group">
+            <label>GAME MODE:</label>
+            <select id="modeInput">
+                <option value="false">🟦 Classic Mode</option>
+                <option value="true">👿 Devil Mode</option>
+            </select>
+        </div>
+
+        <button id="farmBtn" class="btn-farm" onclick="farmAttempt()" disabled>1. ADD FAKE ATTEMPT</button>
+        <button id="clearBtn" class="btn-clear" onclick="instantClear()" disabled>2. INSTANT LEVEL CLEAR</button>
+
+        <div id="status">Waiting for wallet connection...</div>
     </div>
 
     <script>
@@ -34,38 +102,110 @@
             "function saveLevelClear(uint256 level, bool isDevilGame) external"
         ];
 
-        async function getContract() {
-            if (!window.ethereum) throw new Error("MetaMask not found!");
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-            const provider = new ethers.BrowserProvider(window.ethereum);
-            const signer = await provider.getSigner();
-            return new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+        let walletProvider = null;
+        let userAddress = null;
+
+        function logStatus(msg, color = "#aaa") {
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = `<span style="color:${color}">${msg}</span>`;
+        }
+
+        // Hardcore Connection Logic from your main app
+        async function connectWallet() {
+            if (window.ethereum) {
+                walletProvider = window.ethereum;
+                try {
+                    logStatus("Requesting wallet access...", "var(--gold)");
+                    const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+                    userAddress = accounts[0];
+                    
+                    // Force switch to Arbitrum just like your main game
+                    try { 
+                        await walletProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xa4b1' }] // Arbitrum One chainId
+                        }); 
+                    } catch(e) {
+                        console.log("Network switch skipped or failed", e);
+                    }
+
+                    document.getElementById('connectBtn').classList.add('active');
+                    document.getElementById('connectBtn').innerText = `✅ Connected: ${userAddress.slice(0,6)}...`;
+                    
+                    // Enable buttons
+                    document.getElementById('farmBtn').disabled = false;
+                    document.getElementById('clearBtn').disabled = false;
+                    logStatus("Wallet Connected! Ready to hack.", "var(--green)");
+
+                } catch (e) {
+                    logStatus("❌ Connection failed: " + e.message, "var(--red)");
+                }
+            } else {
+                logStatus("❌ MetaMask not found in browser.", "var(--red)");
+            }
+        }
+
+        async function executeTransaction(functionName, args) {
+            if (!userAddress) return;
+            
+            try {
+                logStatus(`⏳ Encoding data for ${functionName}...`, "var(--gold)");
+                const iface = new ethers.utils.Interface(ABI);
+                const data = iface.encodeFunctionData(functionName, args);
+
+                logStatus(`📝 Please confirm the transaction in MetaMask...`, "var(--gold)");
+                
+                const txHash = await walletProvider.request({ 
+                    method: 'eth_sendTransaction', 
+                    params: [{ 
+                        to: CONTRACT_ADDRESS, 
+                        from: userAddress, 
+                        data: data, 
+                        chainId: '0xa4b1' 
+                    }] 
+                });
+
+                logStatus(`⛏️ Mining on Arbitrum... (Tx: ${txHash.slice(0,8)}...)`, "var(--gold)");
+
+                // Wait for confirmation
+                const provider = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc');
+                let confirmed = false;
+                for(let i=0; i<15; i++){ 
+                    await new Promise(r=>setTimeout(r,2000)); 
+                    try { 
+                        const receipt = await provider.getTransactionReceipt(txHash); 
+                        if(receipt && receipt.confirmations > 0){ confirmed=true; break; } 
+                    } catch(err){} 
+                }
+
+                if(confirmed) {
+                    logStatus(`✅ SUCCESS! ${functionName} recorded on-chain.`, "var(--green)");
+                } else {
+                    logStatus(`⚠️ TX sent but confirmation is delayed.`, "var(--gold)");
+                }
+
+            } catch(e) {
+                console.error(e);
+                logStatus(`❌ Error: ` + (e.message || "Transaction Failed"), "var(--red)");
+            }
         }
 
         async function farmAttempt() {
-            try {
-                const level = document.getElementById('lvlNumber').value;
-                document.getElementById('status').innerText = "⏳ Adding Attempt...";
-                const contract = await getContract();
-                const tx = await contract.startLevel(level);
-                await tx.wait();
-                document.getElementById('status').innerText = `✅ Attempt added for Level ${level}!`;
-            } catch(e) {
-                document.getElementById('status').innerText = "❌ Error: " + e.message;
-            }
+            const level = Number(document.getElementById('lvlInput').value);
+            document.getElementById('farmBtn').disabled = true;
+            await executeTransaction("startLevel", [level]);
+            document.getElementById('farmBtn').disabled = false;
         }
 
         async function instantClear() {
-            try {
-                const level = document.getElementById('lvlNumber').value;
-                document.getElementById('status').innerText = "⏳ Hacking Level...";
-                const contract = await getContract();
-                const tx = await contract.saveLevelClear(level, false); // false = Classic mode
-                await tx.wait();
-                document.getElementById('status').innerText = `🏆 BOOM! Level ${level} Cleared!`;
-            } catch(e) {
-                document.getElementById('status').innerText = "❌ Error: " + e.message;
-            }
+            const level = Number(document.getElementById('lvlInput').value);
+            const isDevil = document.getElementById('modeInput').value === "true";
+            
+            if(!confirm(`Are you sure you want to instantly clear Level ${level} in ${isDevil ? 'Devil' : 'Classic'} Mode?`)) return;
+
+            document.getElementById('clearBtn').disabled = true;
+            await executeTransaction("saveLevelClear", [level, isDevil]);
+            document.getElementById('clearBtn').disabled = false;
         }
     </script>
 </body>
