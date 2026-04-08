@@ -2,97 +2,126 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🕵️‍♂️ Tokiyo God Mode</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>GeoDash 3.0 — Admin Tools</title>
+    
+    <meta property="og:title" content="GeoDash 3.0 — The Boss Fight Update">
+    <meta property="og:description" content="Geometry Dash on Arbitrum! Survive the Boss Fight!">
+    <meta property="og:image" content="https://geodash-amber.vercel.app/preview.png">
+    <meta name="fc:frame" content='{"version":"next","imageUrl":"https://geodash-amber.vercel.app/preview.png","button":{"title":"🎮 Play GeoDash 3.0","action":{"type":"launch_frame","name":"GeoDash","url":"https://geodash-amber.vercel.app","splashImageUrl":"https://geodash-amber.vercel.app/icon.png","splashBackgroundColor":"#05080f"}}}' />
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.11.1/ethers.umd.min.js"></script>
     <style>
-        :root {
-            --bg: #05080f;
-            --cyan: #00f0ff;
-            --gold: #ffd700;
-            --red: #ff3060;
-            --green: #00ff88;
+        :root { 
+            --bg-dark: #05080f; 
+            --cyan: #00f0ff; 
+            --red: #ff3060; 
+            --gold: #ffd700; 
+            --emerald: #00ff88; 
         }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Courier New', monospace; }
+        
         body { 
-            background: var(--bg); 
+            background-color: var(--bg-dark); 
             color: #fff; 
-            font-family: 'Courier New', monospace; 
             display: flex; 
-            justify-content: center; 
+            flex-direction: column; 
             align-items: center; 
-            height: 100vh; 
-            margin: 0; 
+            padding: 20px; 
         }
-        .panel { 
-            background: linear-gradient(180deg, #0a0f18, #05080f); 
-            border: 2px solid var(--cyan); 
-            border-radius: 15px; 
-            padding: 30px; 
-            width: 100%; 
-            max-width: 400px; 
-            text-align: center; 
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); 
+
+        .admin-box {
+            width: 100%;
+            max-width: 500px;
+            background: linear-gradient(135deg, rgba(10,15,24,0.95), rgba(5,8,15,0.98));
+            border: 2px solid var(--cyan);
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 50px;
+            box-shadow: 0 0 30px rgba(0,240,255,0.15);
+            text-align: center;
         }
-        h2 { color: var(--gold); margin-top: 0; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
-        .input-group { margin: 20px 0; text-align: left; }
-        label { color: #888; font-size: 12px; font-weight: bold; margin-bottom: 5px; display: block; }
+
+        h2 { color: var(--gold); margin-bottom: 5px; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .subtitle { color: #888; font-size: 12px; margin-bottom: 25px; }
+
+        .input-group { margin-bottom: 20px; text-align: left; }
+        .input-group label { color: var(--cyan); font-size: 14px; font-weight: bold; display: block; margin-bottom: 8px; }
+        
         input, select { 
             width: 100%; 
-            padding: 12px; 
-            background: #000; 
-            border: 1px solid #333; 
-            color: var(--cyan); 
-            border-radius: 8px; 
-            font-size: 16px; 
-            font-family: monospace; 
-            outline: none; 
-            box-sizing: border-box;
-        }
-        button { 
-            width: 100%; 
             padding: 15px; 
-            font-size: 14px; 
-            font-weight: bold; 
+            background: #000; 
+            color: #fff; 
+            border: 1px solid #333; 
+            border-radius: 8px; 
+            outline: none; 
+            font-size: 16px; 
+            font-weight: bold;
+        }
+        
+        select { color: var(--cyan); cursor: pointer; }
+
+        .btn { 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 16px; 
+            font-weight: 900; 
             border: none; 
             border-radius: 8px; 
             cursor: pointer; 
-            margin-top: 10px; 
-            font-family: monospace; 
-            transition: 0.2s; 
+            margin-bottom: 15px; 
+            text-transform: uppercase;
+            transition: all 0.2s;
         }
-        .btn-connect { background: #222; color: #fff; border: 1px solid #444; }
-        .btn-connect.active { background: rgba(0,255,136,0.1); color: var(--green); border-color: var(--green); }
-        .btn-farm { background: rgba(0,240,255,0.1); color: var(--cyan); border: 1px solid var(--cyan); }
-        .btn-clear { background: linear-gradient(90deg, #ff3060, #800); color: #fff; text-shadow: 0 0 5px #000; }
-        button:hover { transform: scale(1.02); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        #status { margin-top: 20px; font-size: 12px; color: #aaa; padding: 10px; background: #000; border-radius: 5px; border: 1px dashed #333; }
+
+        .btn-farm { background: rgba(0,240,255,0.1); border: 2px solid var(--cyan); color: var(--cyan); }
+        .btn-farm:hover { background: var(--cyan); color: #000; box-shadow: 0 0 15px var(--cyan); }
+
+        .btn-clear { background: linear-gradient(90deg, var(--gold), #ff8c00); color: #000; }
+        .btn-clear:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--gold); }
+
+        #statusBox {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #111;
+            border: 1px solid #333;
+            font-size: 13px;
+            color: #aaa;
+            min-height: 50px;
+            word-wrap: break-word;
+        }
+
+        .connected-wallet { color: var(--emerald); font-size: 12px; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="panel">
-        <h2>🕵️‍♂️ GOD MODE PANEL</h2>
+    <div class="admin-box">
+        <h2>🕵️‍♂️ ON-CHAIN INJECTOR</h2>
+        <div class="subtitle">GeoDash 3.0 Stealth Mode</div>
         
-        <button id="connectBtn" class="btn-connect" onclick="connectWallet()">🔗 Connect MetaMask</button>
+        <div class="connected-wallet" id="walletDisplay">🔴 Not Connected. Please open in MetaMask browser.</div>
 
         <div class="input-group">
-            <label>TARGET LEVEL (1-10):</label>
-            <input type="number" id="lvlInput" value="4" min="1" max="10">
-        </div>
-
-        <div class="input-group">
-            <label>GAME MODE:</label>
-            <select id="modeInput">
-                <option value="false">🟦 Classic Mode</option>
-                <option value="true">👿 Devil Mode</option>
+            <label>1. Select Mode</label>
+            <select id="gameMode">
+                <option value="classic">🟦 Classic Mode (GeoDash)</option>
+                <option value="devil">👿 Devil Mode (Hardcore)</option>
             </select>
         </div>
 
-        <button id="farmBtn" class="btn-farm" onclick="farmAttempt()" disabled>1. ADD FAKE ATTEMPT</button>
-        <button id="clearBtn" class="btn-clear" onclick="instantClear()" disabled>2. INSTANT LEVEL CLEAR</button>
+        <div class="input-group">
+            <label>2. Target Level</label>
+            <input type="number" id="targetLevel" value="6" min="1" max="10">
+        </div>
 
-        <div id="status">Waiting for wallet connection...</div>
+        <button class="btn btn-farm" onclick="farmAttempt()">+ Add 1 Fake Attempt</button>
+        <button class="btn btn-clear" onclick="instantClear()">⚡ Instant Level Clear</button>
+
+        <div id="statusBox">System Ready. Awaiting commands...</div>
     </div>
 
     <script>
@@ -102,111 +131,78 @@
             "function saveLevelClear(uint256 level, bool isDevilGame) external"
         ];
 
-        let walletProvider = null;
-        let userAddress = null;
+        let provider, signer, contract;
 
-        function logStatus(msg, color = "#aaa") {
-            const statusEl = document.getElementById('status');
-            statusEl.innerHTML = `<span style="color:${color}">${msg}</span>`;
+        function log(msg, color = "#aaa") {
+            const sb = document.getElementById('statusBox');
+            sb.innerHTML = `<span style="color:${color}">${msg}</span>`;
         }
 
-        // Hardcore Connection Logic from your main app
-        async function connectWallet() {
-            if (window.ethereum) {
-                walletProvider = window.ethereum;
+        async function initWeb3() {
+            if (typeof window.ethereum !== 'undefined') {
                 try {
-                    logStatus("Requesting wallet access...", "var(--gold)");
-                    const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
-                    userAddress = accounts[0];
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    provider = new ethers.BrowserProvider(window.ethereum);
+                    signer = await provider.getSigner();
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
                     
-                    // Force switch to Arbitrum just like your main game
-                    try { 
-                        await walletProvider.request({
+                    const address = await signer.getAddress();
+                    document.getElementById('walletDisplay').innerHTML = `🟢 Connected: ${address.slice(0,6)}...${address.slice(-4)}`;
+                    
+                    // Switch to Arbitrum if needed
+                    try {
+                        await window.ethereum.request({
                             method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0xa4b1' }] // Arbitrum One chainId
-                        }); 
-                    } catch(e) {
-                        console.log("Network switch skipped or failed", e);
+                            params: [{ chainId: '0xa4b1' }], // Arbitrum One Chain ID
+                        });
+                    } catch (switchError) {
+                        log("Please switch MetaMask to Arbitrum One network.", "#ff3060");
                     }
-
-                    document.getElementById('connectBtn').classList.add('active');
-                    document.getElementById('connectBtn').innerText = `✅ Connected: ${userAddress.slice(0,6)}...`;
-                    
-                    // Enable buttons
-                    document.getElementById('farmBtn').disabled = false;
-                    document.getElementById('clearBtn').disabled = false;
-                    logStatus("Wallet Connected! Ready to hack.", "var(--green)");
-
                 } catch (e) {
-                    logStatus("❌ Connection failed: " + e.message, "var(--red)");
+                    log("Connection failed: " + e.message, "#ff3060");
                 }
             } else {
-                logStatus("❌ MetaMask not found in browser.", "var(--red)");
-            }
-        }
-
-        async function executeTransaction(functionName, args) {
-            if (!userAddress) return;
-            
-            try {
-                logStatus(`⏳ Encoding data for ${functionName}...`, "var(--gold)");
-                const iface = new ethers.utils.Interface(ABI);
-                const data = iface.encodeFunctionData(functionName, args);
-
-                logStatus(`📝 Please confirm the transaction in MetaMask...`, "var(--gold)");
-                
-                const txHash = await walletProvider.request({ 
-                    method: 'eth_sendTransaction', 
-                    params: [{ 
-                        to: CONTRACT_ADDRESS, 
-                        from: userAddress, 
-                        data: data, 
-                        chainId: '0xa4b1' 
-                    }] 
-                });
-
-                logStatus(`⛏️ Mining on Arbitrum... (Tx: ${txHash.slice(0,8)}...)`, "var(--gold)");
-
-                // Wait for confirmation
-                const provider = new ethers.providers.JsonRpcProvider('https://arb1.arbitrum.io/rpc');
-                let confirmed = false;
-                for(let i=0; i<15; i++){ 
-                    await new Promise(r=>setTimeout(r,2000)); 
-                    try { 
-                        const receipt = await provider.getTransactionReceipt(txHash); 
-                        if(receipt && receipt.confirmations > 0){ confirmed=true; break; } 
-                    } catch(err){} 
-                }
-
-                if(confirmed) {
-                    logStatus(`✅ SUCCESS! ${functionName} recorded on-chain.`, "var(--green)");
-                } else {
-                    logStatus(`⚠️ TX sent but confirmation is delayed.`, "var(--gold)");
-                }
-
-            } catch(e) {
-                console.error(e);
-                logStatus(`❌ Error: ` + (e.message || "Transaction Failed"), "var(--red)");
+                log("MetaMask not found! You must open this link in Chrome/Brave with MetaMask.", "#ff3060");
             }
         }
 
         async function farmAttempt() {
-            const level = Number(document.getElementById('lvlInput').value);
-            document.getElementById('farmBtn').disabled = true;
-            await executeTransaction("startLevel", [level]);
-            document.getElementById('farmBtn').disabled = false;
+            if (!contract) { log("Connecting wallet...", "#ffd700"); await initWeb3(); if(!contract) return; }
+            
+            const level = document.getElementById('targetLevel').value;
+            log(`Requesting signature to add attempt for Level ${level}...`, "#00f0ff");
+            
+            try {
+                const tx = await contract.startLevel(level);
+                log(`Mining transaction... (Hash: ${tx.hash.slice(0,10)}...)`, "#ffd700");
+                await tx.wait();
+                log(`✅ Attempt successfully added to Level ${level}!`, "#00ff88");
+            } catch (e) {
+                log("❌ Error: " + (e.reason || e.message).slice(0, 50), "#ff3060");
+            }
         }
 
         async function instantClear() {
-            const level = Number(document.getElementById('lvlInput').value);
-            const isDevil = document.getElementById('modeInput').value === "true";
+            if (!contract) { log("Connecting wallet...", "#ffd700"); await initWeb3(); if(!contract) return; }
             
-            if(!confirm(`Are you sure you want to instantly clear Level ${level} in ${isDevil ? 'Devil' : 'Classic'} Mode?`)) return;
-
-            document.getElementById('clearBtn').disabled = true;
-            await executeTransaction("saveLevelClear", [level, isDevil]);
-            document.getElementById('clearBtn').disabled = false;
+            const level = document.getElementById('targetLevel').value;
+            const mode = document.getElementById('gameMode').value;
+            const isDevil = mode === 'devil';
+            
+            log(`Requesting signature to CLEAR Level ${level} (${mode} mode)...`, "#00f0ff");
+            
+            try {
+                const tx = await contract.saveLevelClear(level, isDevil);
+                log(`Mining victory... (Hash: ${tx.hash.slice(0,10)}...)`, "#ffd700");
+                await tx.wait();
+                log(`🏆 BOOM! Level ${level} Cleared on-chain! Check Leaderboard!`, "#00ff88");
+            } catch (e) {
+                log("❌ Error: " + (e.reason || e.message).slice(0, 50), "#ff3060");
+            }
         }
+
+        // Auto-init on load
+        window.addEventListener('load', initWeb3);
     </script>
 </body>
 </html>
